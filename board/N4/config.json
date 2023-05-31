@@ -8,33 +8,38 @@
   "components": [
     {
       "name": "switch",
-      "cnt": 16,
+      "class": "",
       "pic": {
         "mode": "file",
         "on": "vsw_on.png",
         "off": "vbtn_off.png"
       },
-      "mode": "interval",
-      "location": [60, 400],
-      "interval": [10, 0],
-      "shape": [20, 40]
+      "layout": {
+        "cnt": 16,
+        "mode": "interval",
+        "location": [60, 400],
+        "interval": [10, 0],
+        "shape": [20, 40]
+      }
     },
     {
       "name": "btn",
-      "cnt": 5,
+      "class": "",
       "pic": {
         "mode": "file",
         "on": "vbtn_on.png",
         "off": "vbtn_off.png"
       },
-      "mode": "enumerate",
-      "location": [520, 250],
-      "interval": [20, 0],
-      "shape": [30, 30]
+      "layout": {
+        "cnt": 5,
+        "mode": "enumerate",
+        "location": [520, 250],
+        "shape": [30, 30]
+      }
     },
     {
       "name": "led",
-      "cnt": 16,
+      "class": "",
       "pic": {
         "mode": "color",
         "on": {
@@ -48,10 +53,13 @@
           "b": 127
         }
       },
-      "mode": "interval",
-      "location": [62, 360],
-      "interval": [14, 0],
-      "shape": [16, 8]
+      "layout": {
+        "cnt": 16,
+        "mode": "interval",
+        "location": [62, 360],
+        "interval": [14, 0],
+        "shape": [16, 8]
+      }
     }
   ]
 }
