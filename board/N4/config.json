@@ -1,0 +1,57 @@
+{
+  "name": "N4",
+  "version": "1.0.0",
+  "board": {
+    "pic": "vbg_2.png",
+    "shape": [640, 480]
+  },
+  "components": [
+    {
+      "name": "switch",
+      "cnt": 16,
+      "pic": {
+        "mode": "file",
+        "on": "vsw_on.png",
+        "off": "vbtn_off.png"
+      },
+      "mode": "interval",
+      "location": [60, 400],
+      "interval": [10, 0],
+      "shape": [20, 40]
+    },
+    {
+      "name": "btn",
+      "cnt": 5,
+      "pic": {
+        "mode": "file",
+        "on": "vbtn_on.png",
+        "off": "vbtn_off.png"
+      },
+      "mode": "enumerate",
+      "location": [520, 250],
+      "interval": [20, 0],
+      "shape": [30, 30]
+    },
+    {
+      "name": "led",
+      "cnt": 16,
+      "pic": {
+        "mode": "color",
+        "on": {
+          "r": 0,
+          "g": 255,
+          "b": 0
+        },
+        "off": {
+          "r": 127,
+          "g": 127,
+          "b": 127
+        }
+      },
+      "mode": "interval",
+      "location": [62, 360],
+      "interval": [14, 0],
+      "shape": [16, 8]
+    }
+  ]
+}

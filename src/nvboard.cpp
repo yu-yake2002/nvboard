@@ -1,11 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <jsoncpp/json/json.h>
 #include <nvboard.h>
-#include <stdlib.h>
 #include <sys/time.h>
-#include <assert.h>
+
+#include <cassert>
+#include <cstdarg>
+#include <cstdlib>
 #include <string>
-#include <stdarg.h>
+#include <fstream>
 
 #define FPS 60
 
@@ -23,29 +26,13 @@ static uint64_t get_time() {
   return now - boot_time;
 }
 
-typedef struct PinMap {
-  int len;
-  bool is_output;
-  union {
-    uint16_t pin;
-    uint16_t *pins;
-  };
-  void *signal;
-  PinMap *next;
-} PinMap;
-
-static PinMap *pin_map = NULL;
-static PinMap *rt_pin_map = NULL; // real-time pins
-
-static SDL_Window *main_window = nullptr;
 static SDL_Renderer *main_renderer = nullptr;
 uint64_t input_map[NR_INPUT_PINS] = {0};
 uint64_t output_map[NR_OUTPUT_PINS] = {0};
-std::string nvboard_home;
 
 int read_event();
 
-static void nvboard_update_input(PinMap *p) {
+void NVBoard::nvboard_update_input(PinMap *p) {
   void *ptr = p->signal;
   if (p->len == 1) {
     uint8_t val = input_map[p->pin];
@@ -65,7 +52,7 @@ static void nvboard_update_input(PinMap *p) {
   else if (len <= 64) { *(uint64_t *)ptr = val; }
 }
 
-static void nvboard_update_output(PinMap *p) {
+void NVBoard::nvboard_update_output(PinMap *p) {
   void *ptr = p->signal;
   if (p->len == 1) {
     uint8_t val = *(uint8_t *)ptr;
@@ -85,75 +72,74 @@ static void nvboard_update_output(PinMap *p) {
   }
 }
 
-void nvboard_update() {
-  for (auto p = rt_pin_map; p != NULL; p = p->next) {
+int NVBoard::nvboard_update() {
+  for (auto p : this->rt_pin_map_v) {
     if (p->is_output) nvboard_update_output(p);
     else nvboard_update_input(p);
   }
 
   update_rt_components(main_renderer);
-
+  
+  int ret = 1;
   static uint64_t last = 0;
   uint64_t now = get_time();
   if (now - last > 1000000 / FPS) {
     last = now;
 
-    for (auto p = pin_map; p != NULL; p = p->next) {
+    for (auto p : this->pin_map_v) {
       if (p->is_output) nvboard_update_output(p);
       else nvboard_update_input(p);
     }
 
     int ev = read_event();
-    if (ev == -1) { exit(0); }
+    if (ev == -1) { ret = 0; }
 
     update_components(main_renderer);
-    SDL_RenderPresent(main_renderer);
+    this->renderer->RendererUpdate();
   }
+  return ret;
 }
 
-void nvboard_init(int vga_clk_cycle) {
-    printf("NVBoard v0.2\n");
-    // init SDL and SDL_image
-    SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-    IMG_Init(IMG_INIT_PNG);
+NVBoard::NVBoard(int vga_clk_cycle, std::string board_name) {
+  printf("NVBoard v0.2\n");
+  // init SDL and SDL_image
+  SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+  IMG_Init(IMG_INIT_PNG);
 
-    main_window = SDL_CreateWindow("nvboard", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH * 2, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-    main_renderer = SDL_CreateRenderer(main_window, -1, 
-    #ifdef VSYNC
-        SDL_RENDERER_PRESENTVSYNC |
-    #endif
-    #ifdef HARDWARE_ACC
-        SDL_RENDERER_ACCELERATED |
-    #else
-        SDL_RENDERER_SOFTWARE |
-    #endif
-        0
-    );
-    
-    nvboard_home = getenv("NVBOARD_HOME");
-    
-    load_background(main_renderer);
-    load_texture(main_renderer);
-    init_components(main_renderer);
-    init_gui(main_renderer);
+  std::string nvboard_home = getenv("NVBOARD_HOME");
+  std::ifstream ifs(nvboard_home + "/board/" + board_name + "/config.json");
+  Json::Reader reader;
+  Json::Value obj;
+  reader.parse(ifs, obj);
+  
+  this->renderer = new NVBoardRenderer(obj);
+  main_renderer = this->renderer->GetRenderer();
+  
+  init_components(main_renderer);
+  init_gui(main_renderer);
 
-    update_components(main_renderer);
-    update_rt_components(main_renderer);
+  update_components(main_renderer);
+  update_rt_components(main_renderer);
 
-    boot_time = get_time_internal();
-    extern void vga_set_clk_cycle(int cycle);
-    vga_set_clk_cycle(vga_clk_cycle);
+  boot_time = get_time_internal();
+  extern void vga_set_clk_cycle(int cycle);
+  vga_set_clk_cycle(vga_clk_cycle);
 }
 
-void nvboard_quit(){
-    delete_components();
-    SDL_DestroyWindow(main_window);
-    SDL_DestroyRenderer(main_renderer);
-    IMG_Quit();
-    SDL_Quit();
+NVBoard::~NVBoard(){
+  delete_components();
+  delete this->renderer;
+  for (auto p : this->pin_map_v) {
+    delete p;
+  }
+  for (auto p : this->rt_pin_map_v) {
+    delete p;
+  }
+  IMG_Quit();
+  SDL_Quit();
 }
 
-void nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
+void NVBoard::nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
   PinMap *p = new PinMap;
   p->is_output = is_output;
   p->len = len;
@@ -173,6 +159,9 @@ void nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
   va_end(ap);
 
   p->signal = signal;
-  if (is_rt) { p->next = rt_pin_map; rt_pin_map = p; }
-  else { p->next = pin_map; pin_map = p; }
+  if (is_rt) {
+    this->rt_pin_map_v.push_back(p);
+  } else {
+    this->pin_map_v.push_back(p);
+  }
 }

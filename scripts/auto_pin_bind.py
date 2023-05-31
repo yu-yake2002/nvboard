@@ -184,7 +184,7 @@ class AutoBindWriter():
     ratestr = self.board.getPinRateStr(pin)
     dirstr = self.board.getPinDirStr(pin)
     
-    self.iw.write(f"nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, 1, {pin});\n")
+    self.iw.write(f"board->nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, 1, {pin});\n")
   
   def bindVec(self, signal, pins):
     for pin in pins:
@@ -194,7 +194,7 @@ class AutoBindWriter():
     ratestr = self.board.getPinRateStr(pins[0])
     dirstr = self.board.getPinDirStr(pins[0])
     
-    self.iw.write(f"nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, {len(pins)}")
+    self.iw.write(f"board->nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, {len(pins)}")
     for pin in pins:
       self.iw.write(f", {pin}")
     self.iw.write(");\n")
@@ -213,7 +213,7 @@ class AutoBindWriter():
     "#include <nvboard.h>\n"
     f'#include "V{top}.h"\n'
     "\n"
-    f"void nvboard_bind_all_pins(V{top}* top) {{\n"
+    f"void nvboard_bind_all_pins(NVBoard *board, V{top}* top) {{\n"
     ) )
   
   def writeTail(self):
@@ -235,7 +235,7 @@ if __name__ == "__main__":
   
   cons_path = sys.argv[1]
   output_path = sys.argv[2]
-  boardfile_path = os.path.join(nvboard_path, "board/N4")
+  boardfile_path = os.path.join(nvboard_path, "board/N4/board")
 
   if not os.path.exists(cons_path):
     print(f"Error: Constraint file doesn't exist:")

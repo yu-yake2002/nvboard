@@ -1,7 +1,3 @@
-// macro stringizing
-#define str_temp(x) #x
-#define str(x) str_temp(x)
-
 // strlen() for string constant
 #define STRLEN(CONST_STR) (sizeof(CONST_STR) - 1)
 

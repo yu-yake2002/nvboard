@@ -1,13 +1,16 @@
-#include <render.h>
-#include <string>
-#include <map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <component.h>
+#include <configs.h>
+#include <jsoncpp/json/json.h>
+#include <render.h>
+#include <vga.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <configs.h>
-#include <component.h>
+#include <map>
+#include <string>
 
 SDL_Surface *sbutton_on, *sbutton_off;
 SDL_Surface *sswitch_on, *sswitch_off;
@@ -73,87 +76,126 @@ SDL_Rect btn_rects[6] = {
 
 extern std::string nvboard_home;
 
-void load_background(SDL_Renderer *renderer) {
-  sfpga_background = IMG_Load((nvboard_home + "/pic/" + BG_PATH).c_str());
-  tfpga_background = SDL_CreateTextureFromSurface(renderer, sfpga_background);
-  SDL_Rect rect_bg = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-  SDL_RenderCopy(renderer, tfpga_background, NULL, &rect_bg);
+void NVBoardRenderer::load_background(Json::Value obj) {
+  sfpga_background = IMG_Load((this->pic_path + obj["board"]["pic"].asString()).c_str());
+  tfpga_background = SDL_CreateTextureFromSurface(this->main_renderer, sfpga_background);
+  SDL_Rect rect_bg = {0, 0, obj["board"]["shape"][0].asInt(), obj["board"]["shape"][1].asInt()};
+  SDL_RenderCopy(this->main_renderer, tfpga_background, NULL, &rect_bg);
   
 #ifdef SEG_BKGND_ENA
 #ifdef SEG_BKGND_CUSTOM
-  sseg7_background = IMG_Load((nvboard_home + "/pic/" + VSEGLED_BG_PATH).c_str());
+  sseg7_background = IMG_Load((this->pic_path + VSEGLED_BG_PATH).c_str());
 #else
   sseg7_background = SDL_CreateRGBSurface(0, SEG_TOT_WIDTH, SEG_TOT_HEIGHT, 32, 0, 0, 0, 0);
   SDL_FillRect(sseg7_background, NULL, SDL_MapRGB(sseg7_background->format, 0x00, 0x00, 0x00));
 #endif
   
-  tseg7_background = SDL_CreateTextureFromSurface(renderer, sseg7_background);
+  tseg7_background = SDL_CreateTextureFromSurface(this->main_renderer, sseg7_background);
   SDL_Rect rect_seg7 = {SEG_X, SEG_Y, SEG_TOT_WIDTH, SEG_TOT_HEIGHT};
-  SDL_RenderCopy(renderer, tseg7_background, NULL, &rect_seg7);
+  SDL_RenderCopy(this->main_renderer, tseg7_background, NULL, &rect_seg7);
 #endif
 }
 
-void fill_rect_texture(SDL_Renderer *renderer, SDL_Surface **surface, SDL_Texture **texture, int r, int g, int b) {
+static void fill_rect_texture(SDL_Renderer *renderer, SDL_Surface **surface, SDL_Texture **texture, int r, int g, int b) {
   SDL_FillRect(*surface, NULL, SDL_MapRGB((*surface)->format, r, g, b));
   *texture = SDL_CreateTextureFromSurface(renderer, *surface);
 }
 
-void load_texture(SDL_Renderer *renderer) {
+void NVBoardRenderer::load_texture(Json::Value obj) {
   // buttons
-  sbutton_on = IMG_Load((nvboard_home + "/pic/" + VBTN_ON_PATH).c_str());
+  sbutton_on = IMG_Load((this->pic_path + VBTN_ON_PATH).c_str());
   assert(sbutton_on != nullptr);
-  tbutton_on = SDL_CreateTextureFromSurface(renderer, sbutton_on);
-  sbutton_off = IMG_Load((nvboard_home + "/pic/" + VBTN_OFF_PATH).c_str());
+  tbutton_on = SDL_CreateTextureFromSurface(this->main_renderer, sbutton_on);
+  sbutton_off = IMG_Load((this->pic_path + VBTN_OFF_PATH).c_str());
   assert(sbutton_off != nullptr);
-  tbutton_off = SDL_CreateTextureFromSurface(renderer, sbutton_off);
+  tbutton_off = SDL_CreateTextureFromSurface(this->main_renderer, sbutton_off);
 
   // switches
-  sswitch_on = IMG_Load((nvboard_home + "/pic/" + VSW_ON_PATH).c_str());
-  tswitch_on = SDL_CreateTextureFromSurface(renderer, sswitch_on);
-  sswitch_off = IMG_Load((nvboard_home + "/pic/" + VSW_OFF_PATH).c_str());
-  tswitch_off = SDL_CreateTextureFromSurface(renderer, sswitch_off);
+  sswitch_on = IMG_Load((this->pic_path + VSW_ON_PATH).c_str());
+  tswitch_on = SDL_CreateTextureFromSurface(this->main_renderer, sswitch_on);
+  sswitch_off = IMG_Load((this->pic_path + VSW_OFF_PATH).c_str());
+  tswitch_off = SDL_CreateTextureFromSurface(this->main_renderer, sswitch_off);
   
   // 7 segs
   // vertical
   ssegled_ver_on = SDL_CreateRGBSurface(0, SEG_VER_WIDTH, SEG_VER_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_ver_on, &tsegled_ver_on, 0xff, 0x00, 0x00);
+  fill_rect_texture(this->main_renderer, &ssegled_ver_on, &tsegled_ver_on, 0xff, 0x00, 0x00);
   ssegled_ver_off = SDL_CreateRGBSurface(0, SEG_VER_WIDTH, SEG_VER_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_ver_off, &tsegled_ver_off, 0x2b, 0x2b, 0x2b);
+  fill_rect_texture(this->main_renderer, &ssegled_ver_off, &tsegled_ver_off, 0x2b, 0x2b, 0x2b);
 
   // horizontal
   ssegled_hor_on = SDL_CreateRGBSurface(0, SEG_HOR_WIDTH, SEG_HOR_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_hor_on, &tsegled_hor_on, 0xff, 0x00, 0x00);
+  fill_rect_texture(this->main_renderer, &ssegled_hor_on, &tsegled_hor_on, 0xff, 0x00, 0x00);
   ssegled_hor_off = SDL_CreateRGBSurface(0, SEG_HOR_WIDTH, SEG_HOR_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_hor_off, &tsegled_hor_off, 0x2b, 0x2b, 0x2b);
+  fill_rect_texture(this->main_renderer, &ssegled_hor_off, &tsegled_hor_off, 0x2b, 0x2b, 0x2b);
   
   // dot
   ssegled_dot_on = SDL_CreateRGBSurface(0, SEG_DOT_WIDTH, SEG_DOT_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_dot_on, &tsegled_dot_on, 0xff, 0x00, 0x00);
+  fill_rect_texture(this->main_renderer, &ssegled_dot_on, &tsegled_dot_on, 0xff, 0x00, 0x00);
   ssegled_dot_off = SDL_CreateRGBSurface(0, SEG_DOT_WIDTH, SEG_DOT_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &ssegled_dot_off, &tsegled_dot_off, 0x2b, 0x2b, 0x2b);
+  fill_rect_texture(this->main_renderer, &ssegled_dot_off, &tsegled_dot_off, 0x2b, 0x2b, 0x2b);
   
   // LEDs
   sled_off = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_off, &tled_off, 0x7f, 0x7f, 0x7f);
+  fill_rect_texture(this->main_renderer, &sled_off, &tled_off, 0x7f, 0x7f, 0x7f);
 
   sled_r = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_r, &tled_r, 0xff, 0x00, 0x00);
+  fill_rect_texture(this->main_renderer, &sled_r, &tled_r, 0xff, 0x00, 0x00);
 
   sled_g = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_g, &tled_g, 0x00, 0xff, 0x00);
+  fill_rect_texture(this->main_renderer, &sled_g, &tled_g, 0x00, 0xff, 0x00);
   
   sled_b = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_b, &tled_b, 0x00, 0x00, 0xff);
+  fill_rect_texture(this->main_renderer, &sled_b, &tled_b, 0x00, 0x00, 0xff);
 
   sled_rg = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_rg, &tled_rg, 0xff, 0xff, 0x00);
+  fill_rect_texture(this->main_renderer, &sled_rg, &tled_rg, 0xff, 0xff, 0x00);
 
   sled_rb = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_rb, &tled_rb, 0xff, 0x00, 0xff);
+  fill_rect_texture(this->main_renderer, &sled_rb, &tled_rb, 0xff, 0x00, 0xff);
 
   sled_gb = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_gb, &tled_gb, 0x00, 0xff, 0xff);
+  fill_rect_texture(this->main_renderer, &sled_gb, &tled_gb, 0x00, 0xff, 0xff);
 
   sled_rgb = SDL_CreateRGBSurface(0, LED_WIDTH, LED_HEIGHT, 32, 0, 0, 0, 0);
-  fill_rect_texture(renderer, &sled_rgb, &tled_rgb, 0xff, 0xff, 0xff);
+  fill_rect_texture(this->main_renderer, &sled_rgb, &tled_rgb, 0xff, 0xff, 0xff);
+}
+
+NVBoardRenderer::NVBoardRenderer(Json::Value obj) {
+  this->pic_path = std::string(getenv("NVBOARD_HOME")) + "/board/" +
+                         obj["name"].asString() + "/pic/";
+  int board_width = obj["board"]["shape"][0].asInt();
+  int board_height = obj["board"]["shape"][1].asInt();
+
+  this->main_window =
+      SDL_CreateWindow("nvboard", SDL_WINDOWPOS_CENTERED,
+                       SDL_WINDOWPOS_CENTERED, VGA_DEFAULT_WIDTH + board_width,
+                       std::max(VGA_DEFAULT_HEIGHT, board_height), SDL_WINDOW_SHOWN);
+  this->main_renderer = SDL_CreateRenderer(main_window, -1, 
+  #ifdef VSYNC
+      SDL_RENDERER_PRESENTVSYNC |
+  #endif
+  #ifdef HARDWARE_ACC
+      SDL_RENDERER_ACCELERATED |
+  #else
+      SDL_RENDERER_SOFTWARE |
+  #endif
+      0
+  );
+  
+  load_background(obj);
+  load_texture(obj);
+}
+
+SDL_Renderer *NVBoardRenderer::GetRenderer() {
+  return this->main_renderer;
+}
+
+void NVBoardRenderer::RendererUpdate() {
+  SDL_RenderPresent(this->main_renderer);
+}
+
+NVBoardRenderer::~NVBoardRenderer() {
+  SDL_DestroyWindow(this->main_window);
+  SDL_DestroyRenderer(this->main_renderer);
 }

@@ -3,7 +3,7 @@
 
 static TOP_NAME dut;
 
-void nvboard_bind_all_pins(Vtop* top);
+void nvboard_bind_all_pins(NVBoard *board, Vtop* top);
 
 static void single_cycle() {
   dut.clk = 0; dut.eval();
@@ -17,13 +17,18 @@ static void reset(int n) {
 }
 
 int main() {
-  nvboard_bind_all_pins(&dut);
-  nvboard_init();
+  NVBoard *board = new NVBoard();
+  nvboard_bind_all_pins(board, &dut);
 
   reset(10);
 
   while(1) {
-    nvboard_update();
-    single_cycle();
+    if (board->nvboard_update() != 0) {
+      single_cycle();
+    } else {
+      delete board;
+      break;
+    }
   }
+  return 0;
 }

@@ -1,21 +1,69 @@
 #ifndef __NVBOARD_H__
 #define __NVBOARD_H__
 
+#include <component.h>
 #include <configs.h>
 #include <constrs.h>
-#include <render.h>
-#include <component.h>
-#include <vga.h>
 #include <keyboard.h>
+#include <render.h>
+#include <vga.h>
 
-#define BIND_RATE_RT  true
+#include <string>
+
+#define BIND_RATE_RT true
 #define BIND_RATE_SCR false
-#define BIND_DIR_OUT  true
-#define BIND_DIR_IN   false
+#define BIND_DIR_OUT true
+#define BIND_DIR_IN false
 
-void nvboard_init(int vga_clk_cycle = 1);
-void nvboard_quit();
-void nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...);
-void nvboard_update();
+typedef struct PinMap {
+  int len;
+  bool is_output;
+  union {
+    uint16_t pin;
+    uint16_t *pins;
+  };
+  void *signal;
+  PinMap *next;
+} PinMap;
+
+class NVBoard {
+private:
+  NVBoardRenderer *renderer;
+  std::vector<PinMap *> pin_map_v;
+  std::vector<PinMap *> rt_pin_map_v;
+  void nvboard_update_input(PinMap *p);
+  void nvboard_update_output(PinMap *p);
+public:
+  /**
+   * Init NVBoard.
+   *
+   * \param vga_clk_cycle
+   * \param board
+   */
+  NVBoard(int vga_clk_cycle = 1, std::string board = "N4");
+
+  /**
+   * Quit NVBoard.
+   */
+  ~NVBoard();
+
+  /**
+   * Bind pin of NVBoard.
+   *
+   * \param signal
+   * \param is_rt
+   * \param is_output
+   * \param len
+   * \param ...
+   */
+  void nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...);
+
+  /**
+   * Update NVBoard.
+   * 
+   * \return 0 for receiving exit signal
+   */
+  int nvboard_update();
+};
 
 #endif
