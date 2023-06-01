@@ -6,7 +6,7 @@
 #include <component.h>
 #include <keyboard.h>
 
-extern std::vector<Component *> components;
+extern std::list<Component *> components;
 
 static void mousedown_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;

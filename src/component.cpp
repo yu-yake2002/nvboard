@@ -4,12 +4,13 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <list>
 
 extern uint64_t input_map[];
 extern uint64_t output_map[];
 
-std::vector<Component *> components;
-std::vector<Component *> rt_components;  // real-time components
+std::list<Component *> components;
+std::list<Component *> rt_components;  // real-time components
 
 Component::Component(SDL_Renderer *rend, int cnt, int init_val, int it,
                      int ct) {
@@ -132,9 +133,6 @@ extern SDL_Texture *tsegled_ver_off, *tsegled_ver_on, *tsegled_hor_off,
     *tsegled_hor_on, *tsegled_dot_off, *tsegled_dot_on;
 extern SDL_Texture *tled_off, *tled_r, *tled_g, *tled_b, *tled_rg, *tled_rb,
     *tled_gb, *tled_rgb;
-extern SDL_Texture *tfpga_background, *tseg7_background;
-
-extern SDL_Rect segs_rect[8], btn_rects[6];
 
 SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   SDL_Rect ret;
@@ -150,23 +148,25 @@ SDL_Texture *segs_texture(int index, int val);
 void NVBoardRenderer::initButton(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  // init buttons
-  for (int i = 0; i < 6; ++i) {
+  std::vector<SDL_Rect> vec = getLayout(obj);
+  int tmp = 0;
+  for (auto rect : vec) {
     ptr = new Component(renderer, 2, 0, INPUT_TYPE, BUTTON_TYPE);
-
+    
     // off
     rect_ptr = new SDL_Rect;
-    *rect_ptr = btn_rects[i];
+    *rect_ptr = rect;
     ptr->set_rect(rect_ptr, 0);
     ptr->set_texture(tbutton_off, 0);
-
+    
     // on
     rect_ptr = new SDL_Rect;
-    *rect_ptr = btn_rects[i];
+    *rect_ptr = rect;
     ptr->set_rect(rect_ptr, 1);
     ptr->set_texture(tbutton_on, 1);
 
-    ptr->add_input(BTNC + i);
+    ptr->add_input(BTNC + tmp);
+    ++tmp;
     components.push_back(ptr);
   }
 }
@@ -227,27 +227,30 @@ void NVBoardRenderer::initLED(Json::Value obj) {
 void NVBoardRenderer::initSegs7(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  // init 7-segment display
-  for (int i = 0; i < 8; ++i) {
-    SDL_Rect mv = {SEG_X + SEG_SEP +
-                       (7 - i) * (SEG_HOR_WIDTH + SEG_DOT_WIDTH +
-                                  SEG_VER_WIDTH * 2 + SEG_SEP * 2),
-                   SEG_Y + SEG_SEP, 0, 0};
+  std::vector<SDL_Rect> vec = getLayout(obj);
+  int tmp = 0;
+  Json::Value config = obj["config"];
+  for (auto rect : vec) {
     ptr = new SEGS7(renderer, 16, 0x5555, OUTPUT_TYPE, SEGS7_TYPE);
     for (int j = 0; j < 8; ++j) {
+      SDL_Rect seg_rect = (SDL_Rect){
+          config["location"][j][0].asInt(), config["location"][j][1].asInt(),
+          config["shape"][config["type"][j].asString()][0].asInt(),
+          config["shape"][config["type"][j].asString()][1].asInt()};
       rect_ptr = new SDL_Rect;
-      *rect_ptr = mv + segs_rect[j];
+      *rect_ptr = rect + seg_rect;
       ptr->set_texture(segs_texture(j, 0), j << 1 | 0);
       ptr->set_rect(rect_ptr, j << 1 | 0);
       rect_ptr = new SDL_Rect;
-      *rect_ptr = mv + segs_rect[j];
+      *rect_ptr = rect + seg_rect;
       ptr->set_texture(segs_texture(j, 1), j << 1 | 1);
       ptr->set_rect(rect_ptr, j << 1 | 1);
     }
 
-    for (int p = GET_SEGA(i); p <= GET_DECP(i); p++) {
+    for (int p = GET_SEGA(tmp); p <= GET_DECP(tmp); p++) {
       ptr->add_output(p);
     }
+    ++tmp;
     components.push_back(ptr);
   }
 }
@@ -302,7 +305,7 @@ void NVBoardRenderer::init_components(Json::Value obj) {
   }
 }
 
-static void delete_components(std::vector<Component *> *c) {
+static void delete_components(std::list<Component *> *c) {
   for (auto comp_ptr : *c) {
     comp_ptr->remove();
     delete comp_ptr;
@@ -356,7 +359,7 @@ std::vector<SDL_Rect> getLayout(Json::Value obj) {
         fprintf(stderr,
                 "Component %s has value %d for the key \"cnt\", "
                 "but has %d locations.\n",
-                obj["name"].asCString(), cnt, obj["location"].size());
+                obj["name"].asCString(), cnt, layout["location"].size());
       } else {
         for (int i = 0; i < cnt; ++i) {
           ret.push_back((SDL_Rect){layout["location"][i][0].asInt(),

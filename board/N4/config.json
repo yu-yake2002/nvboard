@@ -1,11 +1,19 @@
 {
   "name": "N4",
   "version": "1.0.0",
-  "board": {
-    "pic": "vbg_2.png",
-    "location": [0, 0],
-    "shape": [640, 480]
-  },
+  "shape": [1280, 480],
+  "background": [
+    {
+      "pic": "vbg_2.png",
+      "location": [0, 0],
+      "shape": [640, 480]
+    },
+    {
+      "pic": "vsegled_bg.png",
+      "location": [60, 225],
+      "shape": [374, 81]
+    }
+  ],
   "components": [
     {
       "name": "btn",
@@ -16,9 +24,16 @@
         "off": "vbtn_off.png"
       },
       "layout": {
-        "cnt": 5,
+        "cnt": 6,
         "mode": "enumerate",
-        "location": [[520, 250]],
+        "location": [
+          [520, 250],
+          [520, 200],
+          [520, 300],
+          [470, 250],
+          [570, 250],
+          [560, 150]
+        ],
         "shape": [30, 30]
       }
     },
@@ -64,7 +79,55 @@
     },
     {
       "name": "segs7",
-      "class": "Segs7"
+      "class": "Segs7",
+      "pic": {
+        "mode": "color",
+        "on": {
+          "r": 255,
+          "g": 0,
+          "b": 0
+        },
+        "off": {
+          "r": 127,
+          "g": 127,
+          "b": 127
+        }
+      },
+      "layout": {
+        "cnt": 8,
+        "mode": "interval",
+        "location": [385, 228],
+        "interval": [-46, 0],
+        "shape": [0, 0]
+      },
+      "config": {
+        "have_dot": true,
+        "type": [
+          "horizontal",
+          "vertical",
+          "vertical",
+          "horizontal",
+          "vertical",
+          "vertical",
+          "horizontal",
+          "dot"
+        ],
+        "location": [
+          [6, 3],
+          [36, 6],
+          [36, 39],
+          [6, 69],
+          [3, 39],
+          [3, 6],
+          [6, 36],
+          [42, 68]
+        ],
+        "shape": {
+          "horizontal": [30, 3],
+          "vertical": [3, 30],
+          "dot": [4, 4]
+        }
+      }
     },
     {
       "name": "vga",

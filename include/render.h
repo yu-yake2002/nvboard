@@ -5,21 +5,6 @@
 #include <SDL2/SDL_image.h>
 #include <jsoncpp/json/json.h>
 
-// TODO: remove me!
-#define WINDOW_WIDTH   640
-
-#define SWITCH_X       60
-#define SWITCH_Y       400
-#define SWITCH_SEP     10
-#define SWITCH_WIDTH   20
-#define SWITCH_HEIGHT  40
-
-#define BTNC_X         520
-#define BTNC_Y         250
-#define BTNC_SEP       20
-#define BTNC_WIDTH     30
-#define BTNC_HEIGHT    30
-
 #define LED_X          60 + (4/2)
 #define LED_Y          360
 #define LED_SEP        14

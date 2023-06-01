@@ -29,18 +29,6 @@ SDL_Texture *tsegled_ver_off, *tsegled_ver_on,
             *tsegled_dot_off, *tsegled_dot_on;
 SDL_Texture *tled_off, *tled_r, *tled_g, *tled_b,
             *tled_rg, *tled_rb, *tled_gb, *tled_rgb;
-SDL_Texture *tfpga_background, *tseg7_background;
-
-SDL_Rect segs_rect[8] = {
-  {SEG_SEP + SEG_VER_WIDTH,                     SEG_SEP                                                         , SEG_HOR_WIDTH, SEG_HOR_HEIGHT },
-  {SEG_SEP + SEG_VER_WIDTH + SEG_HOR_WIDTH,     SEG_SEP + SEG_HOR_HEIGHT                                        , SEG_VER_WIDTH, SEG_VER_HEIGHT },
-  {SEG_SEP + SEG_VER_WIDTH + SEG_HOR_WIDTH,     SEG_SEP + 2*SEG_HOR_HEIGHT + SEG_VER_HEIGHT                     , SEG_VER_WIDTH, SEG_VER_HEIGHT },
-  {SEG_SEP + SEG_VER_WIDTH,                     SEG_SEP + 2*SEG_HOR_HEIGHT + 2*SEG_VER_HEIGHT                   , SEG_HOR_WIDTH, SEG_HOR_HEIGHT },
-  {SEG_SEP,                                     SEG_SEP + 2*SEG_HOR_HEIGHT + SEG_VER_HEIGHT                     , SEG_VER_WIDTH, SEG_VER_HEIGHT },
-  {SEG_SEP,                                     SEG_SEP + SEG_HOR_HEIGHT                                        , SEG_VER_WIDTH, SEG_VER_HEIGHT },
-  {SEG_SEP + SEG_VER_WIDTH,                     SEG_SEP + SEG_HOR_HEIGHT + SEG_VER_HEIGHT                       , SEG_HOR_WIDTH, SEG_HOR_HEIGHT },
-  {2*SEG_SEP + 2*SEG_VER_WIDTH + SEG_HOR_WIDTH, SEG_SEP + 3*SEG_HOR_HEIGHT + 2*SEG_VER_HEIGHT - SEG_DOT_HEIGHT  , SEG_DOT_WIDTH, SEG_DOT_HEIGHT }
-};
 
 SDL_Texture *segs_texture(int index, int val) {
   switch (index) {
@@ -65,35 +53,17 @@ SDL_Texture *segs_texture(int index, int val) {
   return nullptr;
 }
 
-SDL_Rect btn_rects[6] = {
-  {BTNC_X,                            BTNC_Y,                                 BTNC_WIDTH, BTNC_HEIGHT },
-  {BTNC_X,                            BTNC_Y - BTNC_HEIGHT - BTNC_SEP,        BTNC_WIDTH, BTNC_HEIGHT },
-  {BTNC_X,                            BTNC_Y + BTNC_HEIGHT + BTNC_SEP,        BTNC_WIDTH, BTNC_HEIGHT },
-  {BTNC_X - BTNC_WIDTH - BTNC_SEP,    BTNC_Y,                                 BTNC_WIDTH, BTNC_HEIGHT },
-  {BTNC_X + BTNC_WIDTH + BTNC_SEP,    BTNC_Y,                                 BTNC_WIDTH, BTNC_HEIGHT },
-  {BTNC_X + BTNC_WIDTH + BTNC_SEP/2,  BTNC_Y - 2 * (BTNC_HEIGHT + BTNC_SEP),  BTNC_WIDTH, BTNC_HEIGHT }
-};
-
 extern std::string nvboard_home;
 
 void NVBoardRenderer::load_background(Json::Value obj) {
-  sfpga_background = IMG_Load((this->pic_path + obj["board"]["pic"].asString()).c_str());
-  tfpga_background = SDL_CreateTextureFromSurface(this->renderer, sfpga_background);
-  SDL_Rect rect_bg = {0, 0, obj["board"]["shape"][0].asInt(), obj["board"]["shape"][1].asInt()};
-  SDL_RenderCopy(this->renderer, tfpga_background, NULL, &rect_bg);
-  
-#ifdef SEG_BKGND_ENA
-#ifdef SEG_BKGND_CUSTOM
-  sseg7_background = IMG_Load((this->pic_path + VSEGLED_BG_PATH).c_str());
-#else
-  sseg7_background = SDL_CreateRGBSurface(0, SEG_TOT_WIDTH, SEG_TOT_HEIGHT, 32, 0, 0, 0, 0);
-  SDL_FillRect(sseg7_background, NULL, SDL_MapRGB(sseg7_background->format, 0x00, 0x00, 0x00));
-#endif
-  
-  tseg7_background = SDL_CreateTextureFromSurface(this->renderer, sseg7_background);
-  SDL_Rect rect_seg7 = {SEG_X, SEG_Y, SEG_TOT_WIDTH, SEG_TOT_HEIGHT};
-  SDL_RenderCopy(this->renderer, tseg7_background, NULL, &rect_seg7);
-#endif
+  for (auto bg : obj) {
+  SDL_Surface *surface =
+      IMG_Load((this->pic_path + bg["pic"].asString()).c_str());
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+  SDL_Rect rect_bg = {bg["location"][0].asInt(), bg["location"][1].asInt(),
+                      bg["shape"][0].asInt(), bg["shape"][1].asInt()};
+  SDL_RenderCopy(this->renderer, texture, NULL, &rect_bg);
+  }
 }
 
 static void fill_rect_texture(SDL_Renderer *renderer, SDL_Surface **surface, SDL_Texture **texture, int r, int g, int b) {
@@ -104,10 +74,8 @@ static void fill_rect_texture(SDL_Renderer *renderer, SDL_Surface **surface, SDL
 void NVBoardRenderer::load_texture(Json::Value obj) {
   // buttons
   sbutton_on = IMG_Load((this->pic_path + VBTN_ON_PATH).c_str());
-  assert(sbutton_on != nullptr);
   tbutton_on = SDL_CreateTextureFromSurface(this->renderer, sbutton_on);
   sbutton_off = IMG_Load((this->pic_path + VBTN_OFF_PATH).c_str());
-  assert(sbutton_off != nullptr);
   tbutton_off = SDL_CreateTextureFromSurface(this->renderer, sbutton_off);
 
   // switches
@@ -164,13 +132,12 @@ void NVBoardRenderer::load_texture(Json::Value obj) {
 NVBoardRenderer::NVBoardRenderer(Json::Value obj) {
   this->pic_path = std::string(getenv("NVBOARD_HOME")) + "/board/" +
                          obj["name"].asString() + "/pic/";
-  int board_width = obj["board"]["shape"][0].asInt();
-  int board_height = obj["board"]["shape"][1].asInt();
+  int board_width = obj["shape"][0].asInt();
+  int board_height = obj["shape"][1].asInt();
 
-  this->window =
-      SDL_CreateWindow("nvboard", SDL_WINDOWPOS_CENTERED,
-                       SDL_WINDOWPOS_CENTERED, VGA_DEFAULT_WIDTH + board_width,
-                       std::max(VGA_DEFAULT_HEIGHT, board_height), SDL_WINDOW_SHOWN);
+  this->window = SDL_CreateWindow("nvboard", SDL_WINDOWPOS_CENTERED,
+                                  SDL_WINDOWPOS_CENTERED, board_width,
+                                  board_height, SDL_WINDOW_SHOWN);
   this->renderer = SDL_CreateRenderer(window, -1, 
   #ifdef VSYNC
       SDL_RENDERER_PRESENTVSYNC |
@@ -183,7 +150,7 @@ NVBoardRenderer::NVBoardRenderer(Json::Value obj) {
       0
   );
   
-  load_background(obj);
+  load_background(obj["background"]);
   load_texture(obj);
   init_components(obj);
 }
