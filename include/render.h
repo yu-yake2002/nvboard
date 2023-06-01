@@ -43,14 +43,20 @@
 
 class NVBoardRenderer {
 private:
-  SDL_Window *main_window;
-  SDL_Renderer *main_renderer;
+  SDL_Window *window;
+  SDL_Renderer *renderer;
   std::string pic_path;
   std::vector<SDL_Surface *> surfaces;
   std::vector<SDL_Texture *> textures;
   void load_background(Json::Value obj);
   void load_texture(Json::Value obj);
-
+  void init_components(Json::Value obj);
+  void initButton(Json::Value obj);
+  void initSwitch(Json::Value obj);
+  void initLED(Json::Value obj);
+  void initSegs7(Json::Value obj);
+  void initVGA(Json::Value obj);
+  void initKeyboard(Json::Value obj);
 public:
   void RendererUpdate();
   SDL_Renderer *GetRenderer();

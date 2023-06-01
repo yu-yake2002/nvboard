@@ -2,6 +2,7 @@
 #define _VFPGA_COMPONENT_H
 
 #include <SDL2/SDL.h>
+#include <jsoncpp/json/json.h>
 #include <vector>
 #include <constrs.h>
 
@@ -80,6 +81,8 @@ void init_gui(SDL_Renderer *renderer);
 void update_components(SDL_Renderer *renderer);
 void update_rt_components(SDL_Renderer *renderer);
 void delete_components();
+
+std::vector<SDL_Rect> getLayout(Json::Value obj);
 
 #define GET_SEGA(i) (SEG0A + 8 * i)
 #define GET_DECP(i) (SEG0A + 8 * i + 7)

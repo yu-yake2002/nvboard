@@ -3,28 +3,13 @@
   "version": "1.0.0",
   "board": {
     "pic": "vbg_2.png",
+    "location": [0, 0],
     "shape": [640, 480]
   },
   "components": [
     {
-      "name": "switch",
-      "class": "",
-      "pic": {
-        "mode": "file",
-        "on": "vsw_on.png",
-        "off": "vbtn_off.png"
-      },
-      "layout": {
-        "cnt": 16,
-        "mode": "interval",
-        "location": [60, 400],
-        "interval": [10, 0],
-        "shape": [20, 40]
-      }
-    },
-    {
       "name": "btn",
-      "class": "",
+      "class": "Button",
       "pic": {
         "mode": "file",
         "on": "vbtn_on.png",
@@ -33,13 +18,29 @@
       "layout": {
         "cnt": 5,
         "mode": "enumerate",
-        "location": [520, 250],
+        "location": [[520, 250]],
         "shape": [30, 30]
       }
     },
     {
+      "name": "switch",
+      "class": "Switch",
+      "pic": {
+        "mode": "file",
+        "on": "vsw_on.png",
+        "off": "vbtn_off.png"
+      },
+      "layout": {
+        "cnt": 16,
+        "mode": "interval",
+        "location": [510, 400],
+        "interval": [-30, 0],
+        "shape": [20, 40]
+      }
+    },
+    {
       "name": "led",
-      "class": "",
+      "class": "LED",
       "pic": {
         "mode": "color",
         "on": {
@@ -56,9 +57,33 @@
       "layout": {
         "cnt": 16,
         "mode": "interval",
-        "location": [62, 360],
-        "interval": [14, 0],
+        "location": [512, 360],
+        "interval": [-30, 0],
         "shape": [16, 8]
+      }
+    },
+    {
+      "name": "segs7",
+      "class": "Segs7"
+    },
+    {
+      "name": "vga",
+      "class": "VGA",
+      "pic": {
+        "mode": "null"
+      },
+      "layout": {
+        "cnt": 1,
+        "mode": "enumerate",
+        "location": [[640, 0]],
+        "shape": [640, 480]
+      }
+    },
+    {
+      "name": "kbd",
+      "class": "Keyboard",
+      "pic": {
+        "mode": "null"
       }
     }
   ]

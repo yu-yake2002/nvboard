@@ -9,6 +9,7 @@
 #include <vga.h>
 
 #include <string>
+#include <list>
 
 #define BIND_RATE_RT true
 #define BIND_RATE_SCR false
@@ -23,16 +24,16 @@ typedef struct PinMap {
     uint16_t *pins;
   };
   void *signal;
-  PinMap *next;
 } PinMap;
 
 class NVBoard {
 private:
   NVBoardRenderer *renderer;
-  std::vector<PinMap *> pin_map_v;
-  std::vector<PinMap *> rt_pin_map_v;
+  std::list<PinMap *> pin_map_v;
+  std::list<PinMap *> rt_pin_map_v;
   void nvboard_update_input(PinMap *p);
   void nvboard_update_output(PinMap *p);
+  
 public:
   /**
    * Init NVBoard.

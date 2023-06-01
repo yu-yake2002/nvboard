@@ -115,7 +115,6 @@ NVBoard::NVBoard(int vga_clk_cycle, std::string board_name) {
   this->renderer = new NVBoardRenderer(obj);
   main_renderer = this->renderer->GetRenderer();
   
-  init_components(main_renderer);
   init_gui(main_renderer);
 
   update_components(main_renderer);
