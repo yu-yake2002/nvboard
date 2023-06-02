@@ -57,8 +57,6 @@ public:
   virtual void update_gui();
   virtual void update_state();
   void remove();
-
-  friend void delete_components();
 };
 
 class RGB_LED : public Component{
@@ -74,15 +72,5 @@ public:
   virtual void update_gui();
   virtual void update_state();
 };
-
-void init_components(SDL_Renderer *renderer);
-void init_gui(SDL_Renderer *renderer);
-
-void update_components(SDL_Renderer *renderer);
-void update_rt_components(SDL_Renderer *renderer);
-void delete_components();
-
-#define GET_SEGA(i) (SEG0A + 8 * i)
-#define GET_DECP(i) (SEG0A + 8 * i + 7)
 
 #endif

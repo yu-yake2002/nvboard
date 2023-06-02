@@ -8,7 +8,6 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <string>
-#include <fstream>
 
 #define FPS 60
 
@@ -26,13 +25,10 @@ static uint64_t get_time() {
   return now - boot_time;
 }
 
-static SDL_Renderer *main_renderer = nullptr;
 uint64_t input_map[NR_INPUT_PINS] = {0};
 uint64_t output_map[NR_OUTPUT_PINS] = {0};
 
-int read_event();
-
-void NVBoard::nvboard_update_input(PinMap *p) {
+void NVBoardController::UpdateInputPin(PinMap *p) {
   void *ptr = p->signal;
   if (p->len == 1) {
     uint8_t val = input_map[p->pin];
@@ -52,7 +48,7 @@ void NVBoard::nvboard_update_input(PinMap *p) {
   else if (len <= 64) { *(uint64_t *)ptr = val; }
 }
 
-void NVBoard::nvboard_update_output(PinMap *p) {
+void NVBoardController::UpdateOutputPin(PinMap *p) {
   void *ptr = p->signal;
   if (p->len == 1) {
     uint8_t val = *(uint8_t *)ptr;
@@ -72,13 +68,13 @@ void NVBoard::nvboard_update_output(PinMap *p) {
   }
 }
 
-int NVBoard::nvboard_update() {
-  for (auto p : this->rt_pin_map_v) {
-    if (p->is_output) nvboard_update_output(p);
-    else nvboard_update_input(p);
+int NVBoardController::Update() {
+  for (auto p : rt_pin_map_v_) {
+    if (p->is_output) UpdateOutputPin(p);
+    else UpdateInputPin(p);
   }
 
-  update_rt_components(main_renderer);
+  viewer_->UpdateRTComponents();
   
   int ret = 1;
   static uint64_t last = 0;
@@ -86,59 +82,39 @@ int NVBoard::nvboard_update() {
   if (now - last > 1000000 / FPS) {
     last = now;
 
-    for (auto p : this->pin_map_v) {
-      if (p->is_output) nvboard_update_output(p);
-      else nvboard_update_input(p);
+    for (auto p : pin_map_v_) {
+      if (p->is_output) UpdateOutputPin(p);
+      else UpdateInputPin(p);
     }
 
-    int ev = read_event();
-    if (ev == -1) { ret = 0; }
+    if (viewer_->read_event() == -1) { ret = 0; }
 
-    update_components(main_renderer);
-    this->renderer->RendererUpdate();
+    viewer_->UpdateNotRTComponents();
+    viewer_->RendererUpdate();
   }
   return ret;
 }
 
-NVBoard::NVBoard(int vga_clk_cycle, std::string board_name) {
+NVBoardController::NVBoardController(NVBoardViewer *viewer) {
   printf("NVBoard v0.2\n");
-  // init SDL and SDL_image
-  SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-  IMG_Init(IMG_INIT_PNG);
-
-  std::string nvboard_home = getenv("NVBOARD_HOME");
-  std::ifstream ifs(nvboard_home + "/board/" + board_name + "/config.json");
-  Json::Reader reader;
-  Json::Value obj;
-  reader.parse(ifs, obj);
-  
-  this->renderer = new NVBoardRenderer(obj);
-  main_renderer = this->renderer->GetRenderer();
-  
-  init_gui(main_renderer);
-
-  update_components(main_renderer);
-  update_rt_components(main_renderer);
-
+  this->viewer_ = viewer;
   boot_time = get_time_internal();
-  extern void vga_set_clk_cycle(int cycle);
-  vga_set_clk_cycle(vga_clk_cycle);
 }
 
-NVBoard::~NVBoard(){
-  delete_components();
-  delete this->renderer;
-  for (auto p : this->pin_map_v) {
+NVBoardController::~NVBoardController(){
+  viewer_->delete_components();
+  delete viewer_;
+  for (auto p : pin_map_v_) {
     delete p;
   }
-  for (auto p : this->rt_pin_map_v) {
+  for (auto p : rt_pin_map_v_) {
     delete p;
   }
   IMG_Quit();
   SDL_Quit();
 }
 
-void NVBoard::nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
+void NVBoardController::nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
   PinMap *p = new PinMap;
   p->is_output = is_output;
   p->len = len;
@@ -159,8 +135,8 @@ void NVBoard::nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len
 
   p->signal = signal;
   if (is_rt) {
-    this->rt_pin_map_v.push_back(p);
+    rt_pin_map_v_.push_back(p);
   } else {
-    this->pin_map_v.push_back(p);
+    pin_map_v_.push_back(p);
   }
 }

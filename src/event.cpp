@@ -6,9 +6,7 @@
 #include <component.h>
 #include <keyboard.h>
 
-extern std::list<Component *> components;
-
-static void mousedown_handler(const SDL_Event &ev) {
+void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
   for (auto i : components) {
@@ -21,11 +19,11 @@ static void mousedown_handler(const SDL_Event &ev) {
   }
 }
 
-static void mouseup_handler(const SDL_Event &ev) {
+void NVBoardViewer::mouseup_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
   for (auto i : components) {
-    if (i->in_rect(x_pos, y_pos) && i->get_interface_type() == INPUT_TYPE) {
+    if (i->get_interface_type() == INPUT_TYPE && i->in_rect(x_pos, y_pos)) {
       switch (i->get_component_type()) {
         case BUTTON_TYPE: input_map[i->get_input()] = 0; break;
       }
@@ -33,14 +31,14 @@ static void mouseup_handler(const SDL_Event &ev) {
   }
 }
 
-static void key_handler(uint8_t scancode, int is_keydown){
+void NVBoardViewer::key_handler(uint8_t scancode, int is_keydown) {
   extern KEYBOARD* kb;
   kb->push_key(scancode, is_keydown);
 }
 
 // Return -1 when esc is pressed.
 // Else return whether buttons / switches are pressed.
-int read_event() {
+int NVBoardViewer::read_event() {
   SDL_Event ev;
   SDL_PollEvent(&ev);
   switch (ev.type) {

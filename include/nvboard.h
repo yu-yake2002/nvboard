@@ -26,27 +26,26 @@ typedef struct PinMap {
   void *signal;
 } PinMap;
 
-class NVBoard {
+class NVBoardController {
 private:
-  NVBoardRenderer *renderer;
-  std::list<PinMap *> pin_map_v;
-  std::list<PinMap *> rt_pin_map_v;
-  void nvboard_update_input(PinMap *p);
-  void nvboard_update_output(PinMap *p);
+  NVBoardViewer *viewer_;
+  std::list<PinMap *> pin_map_v_;
+  std::list<PinMap *> rt_pin_map_v_;
+  void UpdateInputPin(PinMap *p);
+  void UpdateOutputPin(PinMap *p);
   
 public:
   /**
    * Init NVBoard.
    *
-   * \param vga_clk_cycle
    * \param board
    */
-  NVBoard(int vga_clk_cycle = 1, std::string board = "N4");
+  NVBoardController(NVBoardViewer *viewer);
 
   /**
    * Quit NVBoard.
    */
-  ~NVBoard();
+  ~NVBoardController();
 
   /**
    * Bind pin of NVBoard.
@@ -64,7 +63,7 @@ public:
    * 
    * \return 0 for receiving exit signal
    */
-  int nvboard_update();
+  int Update();
 };
 
 #endif

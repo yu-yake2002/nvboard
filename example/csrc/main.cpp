@@ -1,32 +1,32 @@
 #include <nvboard.h>
 #include <Vtop.h>
 
-static TOP_NAME dut;
+void nvboard_bind_all_pins(NVBoardController *board, Vtop* top);
 
-void nvboard_bind_all_pins(NVBoard *board, Vtop* top);
-
-static void single_cycle() {
-  dut.clk = 0; dut.eval();
-  dut.clk = 1; dut.eval();
+static inline void single_cycle(TOP_NAME *dut) {
+  dut->clk = 0; dut->eval();
+  dut->clk = 1; dut->eval();
 }
 
-static void reset(int n) {
-  dut.rst = 1;
-  while (n -- > 0) single_cycle();
-  dut.rst = 0;
+static inline void reset(Vtop *dut, int n) {
+  dut->rst = 1;
+  while (n -- > 0) single_cycle(dut);
+  dut->rst = 0;
 }
 
 int main() {
-  NVBoard *board = new NVBoard();
-  nvboard_bind_all_pins(board, &dut);
+  Vtop *model = new Vtop();
+  NVBoardViewer *viewer = new NVBoardViewer();
+  NVBoardController *controller = new NVBoardController(viewer);
+  nvboard_bind_all_pins(controller, model);
 
-  reset(10);
+  reset(model, 10);
 
   while(1) {
-    if (board->nvboard_update() != 0) {
-      single_cycle();
+    if (controller->Update() != 0) {
+      single_cycle(model);
     } else {
-      delete board;
+      delete controller;
       break;
     }
   }

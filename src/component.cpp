@@ -9,9 +9,6 @@
 extern uint64_t input_map[];
 extern uint64_t output_map[];
 
-std::list<Component *> components;
-std::list<Component *> rt_components;  // real-time components
-
 Component::Component(SDL_Renderer *rend, int cnt, int init_val, int it,
                      int ct) {
   m_renderer = rend;
@@ -140,9 +137,7 @@ SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   return ret;
 }
 
-SDL_Texture *segs_texture(int index, int val);
-
-void NVBoardRenderer::initButton(Json::Value obj) {
+void NVBoardViewer::initButton(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
   std::vector<SDL_Rect> rect_vec = GetLayout(obj);
@@ -165,7 +160,7 @@ void NVBoardRenderer::initButton(Json::Value obj) {
   }
 }
 
-void NVBoardRenderer::initSwitch(Json::Value obj) {
+void NVBoardViewer::initSwitch(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
   std::vector<SDL_Rect> rect_vec = GetLayout(obj);
@@ -187,7 +182,7 @@ void NVBoardRenderer::initSwitch(Json::Value obj) {
   }
 }
 
-void NVBoardRenderer::initLED(Json::Value obj) {
+void NVBoardViewer::initLED(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
   std::vector<SDL_Rect> rect_vec = GetLayout(obj);
@@ -210,7 +205,10 @@ void NVBoardRenderer::initLED(Json::Value obj) {
   }
 }
 
-void NVBoardRenderer::initSegs7(Json::Value obj) {
+#define GET_SEGA(i) (SEG0A + 8 * i)
+#define GET_DECP(i) (SEG0A + 8 * i + 7)
+
+void NVBoardViewer::initSegs7(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
   std::vector<SDL_Rect> vec = GetLayout(obj);
@@ -251,7 +249,7 @@ void NVBoardRenderer::initSegs7(Json::Value obj) {
   }
 }
 
-void NVBoardRenderer::initVGA(Json::Value obj) {
+void NVBoardViewer::initVGA(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
   std::vector<SDL_Rect> vec = GetLayout(obj);
@@ -267,9 +265,16 @@ void NVBoardRenderer::initVGA(Json::Value obj) {
     }
     rt_components.push_back(ptr);
   }
+  
+  extern void vga_set_clk_cycle(int cycle);
+  if (obj.isMember("config") && obj["config"].isMember("clk")) {
+    vga_set_clk_cycle(obj["config"]["clk"].asInt());
+  } else {
+    vga_set_clk_cycle(1);
+  }
 }
 
-void NVBoardRenderer::initKeyboard(Json::Value obj) {
+void NVBoardViewer::initKeyboard(Json::Value obj) {
   // init keyboard
   extern KEYBOARD *kb;
   kb = new KEYBOARD(renderer, 0, 0, INPUT_TYPE, KEYBOARD_TYPE);
@@ -279,7 +284,7 @@ void NVBoardRenderer::initKeyboard(Json::Value obj) {
   rt_components.push_back(kb);
 }
 
-void NVBoardRenderer::init_components(Json::Value obj) {
+void NVBoardViewer::init_components(Json::Value obj) {
   for (auto i : obj) {
     std::string i_class = i["class"].asString();
     if (i_class == "Button") {
@@ -301,39 +306,39 @@ void NVBoardRenderer::init_components(Json::Value obj) {
   }
 }
 
-static void delete_components(std::list<Component *> *c) {
-  for (auto comp_ptr : *c) {
+void NVBoardViewer::delete_components() {
+  for (auto comp_ptr : components) {
     comp_ptr->remove();
     delete comp_ptr;
   }
-  c->clear();
-}
-
-void delete_components() {
-  delete_components(&components);
-  delete_components(&rt_components);
+  components.clear();
+  for (auto comp_ptr : rt_components) {
+    comp_ptr->remove();
+    delete comp_ptr;
+  }
+  rt_components.clear();
 }
 
 // render buttons, switches, leds and 7-segs
-void init_gui(SDL_Renderer *renderer) {
+void NVBoardViewer::init_gui() {
   for (auto ptr : components) {
     ptr->update_gui();
   }
 }
 
-void update_components(SDL_Renderer *renderer) {
+void NVBoardViewer::UpdateNotRTComponents() {
   for (auto ptr : components) {
     ptr->update_state();
   }
 }
 
-void update_rt_components(SDL_Renderer *renderer) {
+void NVBoardViewer::UpdateRTComponents() {
   for (auto ptr : rt_components) {
     ptr->update_state();
   }
 }
 
-std::vector<SDL_Rect> NVBoardRenderer::GetLayout(Json::Value obj) {
+std::vector<SDL_Rect> NVBoardViewer::GetLayout(Json::Value obj) {
   std::vector<SDL_Rect> ret;
   if (obj.isMember("layout")) {
     Json::Value layout = obj["layout"];
@@ -375,7 +380,7 @@ std::vector<SDL_Rect> NVBoardRenderer::GetLayout(Json::Value obj) {
   return ret;
 }
 
-std::vector<PairTexInt> NVBoardRenderer::GetTexture(Json::Value obj) {
+std::vector<PairTexInt> NVBoardViewer::GetTexture(Json::Value obj) {
   std::vector<PairTexInt> ret;
   if (obj.isMember("texture")) {
     SDL_Surface *sdl_surface;

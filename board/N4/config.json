@@ -156,6 +156,9 @@
         "mode": "enumerate",
         "location": [[640, 0]],
         "shape": [640, 480]
+      },
+      "config": {
+        "clk": 1
       }
     },
     {
