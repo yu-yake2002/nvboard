@@ -18,10 +18,18 @@
     {
       "name": "btn",
       "class": "Button",
-      "pic": {
+      "texture": {
         "mode": "file",
-        "on": "vbtn_on.png",
-        "off": "vbtn_off.png"
+        "file": [
+          {
+            "name": "vbtn_off.png",
+            "val": 0
+          },
+          {
+            "name": "vbtn_on.png",
+            "val": 1
+          }
+        ]
       },
       "layout": {
         "cnt": 6,
@@ -40,10 +48,18 @@
     {
       "name": "switch",
       "class": "Switch",
-      "pic": {
+      "texture": {
         "mode": "file",
-        "on": "vsw_on.png",
-        "off": "vbtn_off.png"
+        "file": [
+          {
+            "name": "vsw_off.png",
+            "val": 0
+          },
+          {
+            "name": "vsw_on.png",
+            "val": 1
+          }
+        ]
       },
       "layout": {
         "cnt": 16,
@@ -56,18 +72,18 @@
     {
       "name": "led",
       "class": "LED",
-      "pic": {
+      "texture": {
         "mode": "color",
-        "on": {
-          "r": 0,
-          "g": 255,
-          "b": 0
-        },
-        "off": {
-          "r": 127,
-          "g": 127,
-          "b": 127
-        }
+        "color" : [
+          {
+            "rgb": [0,255, 0],
+            "val": 1
+          },
+          {
+            "rgb": [127, 127, 127],
+            "val" : 0
+          }
+        ]
       },
       "layout": {
         "cnt": 16,
@@ -80,18 +96,18 @@
     {
       "name": "segs7",
       "class": "Segs7",
-      "pic": {
+      "texture": {
         "mode": "color",
-        "on": {
-          "r": 255,
-          "g": 0,
-          "b": 0
-        },
-        "off": {
-          "r": 127,
-          "g": 127,
-          "b": 127
-        }
+        "color": [
+          {
+            "rgb": [127, 127, 127],
+            "val": 0
+          },
+          {
+            "rgb": [255, 0, 0],
+            "val": 1
+          }
+        ]
       },
       "layout": {
         "cnt": 8,
@@ -144,10 +160,7 @@
     },
     {
       "name": "kbd",
-      "class": "Keyboard",
-      "pic": {
-        "mode": "null"
-      }
+      "class": "Keyboard"
     }
   ]
 }

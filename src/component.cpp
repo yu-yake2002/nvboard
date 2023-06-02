@@ -127,12 +127,9 @@ void SEGS7::update_state() {
   }
 }
 
-extern SDL_Texture *tbutton_on, *tbutton_off;
-extern SDL_Texture *tswitch_on, *tswitch_off;
 extern SDL_Texture *tsegled_ver_off, *tsegled_ver_on, *tsegled_hor_off,
     *tsegled_hor_on, *tsegled_dot_off, *tsegled_dot_on;
-extern SDL_Texture *tled_off, *tled_r, *tled_g, *tled_b, *tled_rg, *tled_rb,
-    *tled_gb, *tled_rgb;
+
 
 SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   SDL_Rect ret;
@@ -148,22 +145,19 @@ SDL_Texture *segs_texture(int index, int val);
 void NVBoardRenderer::initButton(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  std::vector<SDL_Rect> vec = getLayout(obj);
+  std::vector<SDL_Rect> rect_vec = GetLayout(obj);
+  std::vector<PairTexInt> tex_vec = GetTexture(obj);
+  
   int tmp = 0;
-  for (auto rect : vec) {
+  for (auto rect : rect_vec) {
     ptr = new Component(renderer, 2, 0, INPUT_TYPE, BUTTON_TYPE);
-    
-    // off
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 0);
-    ptr->set_texture(tbutton_off, 0);
-    
-    // on
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 1);
-    ptr->set_texture(tbutton_on, 1);
+
+    for (auto tex : tex_vec) {
+      rect_ptr = new SDL_Rect;
+      *rect_ptr = rect;
+      ptr->set_rect(rect_ptr, tex.second);
+      ptr->set_texture(tex.first, tex.second);
+    }
 
     ptr->add_input(BTNC + tmp);
     ++tmp;
@@ -174,22 +168,18 @@ void NVBoardRenderer::initButton(Json::Value obj) {
 void NVBoardRenderer::initSwitch(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  std::vector<SDL_Rect> vec = getLayout(obj);
+  std::vector<SDL_Rect> rect_vec = GetLayout(obj);
+  std::vector<PairTexInt> tex_vec = GetTexture(obj);
   int tmp = 0;
-  for (auto rect : vec) {
+  for (auto rect : rect_vec) {
     ptr = new Component(renderer, 2, 0, INPUT_TYPE, SWICTH_TYPE);
-
-    // off
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 0);
-    ptr->set_texture(tswitch_off, 0);
-
-    // on
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 1);
-    ptr->set_texture(tswitch_on, 1);
+    
+    for (auto tex : tex_vec) {
+      rect_ptr = new SDL_Rect;
+      *rect_ptr = rect;
+      ptr->set_rect(rect_ptr, tex.second);
+      ptr->set_texture(tex.first, tex.second);
+    }
 
     ptr->add_input(SW0 + tmp);
     ++tmp;
@@ -200,23 +190,19 @@ void NVBoardRenderer::initSwitch(Json::Value obj) {
 void NVBoardRenderer::initLED(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  std::vector<SDL_Rect> vec = getLayout(obj);
+  std::vector<SDL_Rect> rect_vec = GetLayout(obj);
+  std::vector<PairTexInt> tex_vec = GetTexture(obj);
   int tmp = 0;
   // init naive leds
-  for (auto rect : vec) {
+  for (auto rect : rect_vec) {
     ptr = new Component(renderer, 2, 0, OUTPUT_TYPE, NAIVE_LED_TYPE);
-
-    // off
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 0);
-    ptr->set_texture(tled_off, 0);
-
-    // on
-    rect_ptr = new SDL_Rect;
-    *rect_ptr = rect;
-    ptr->set_rect(rect_ptr, 1);
-    ptr->set_texture(tled_g, 1);
+    
+    for (auto tex : tex_vec) {
+      rect_ptr = new SDL_Rect;
+      *rect_ptr = rect;
+      ptr->set_rect(rect_ptr, tex.second);
+      ptr->set_texture(tex.first, tex.second);
+    }
 
     ptr->add_output(LD0 + tmp);
     ++tmp;
@@ -227,24 +213,34 @@ void NVBoardRenderer::initLED(Json::Value obj) {
 void NVBoardRenderer::initSegs7(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  std::vector<SDL_Rect> vec = getLayout(obj);
+  std::vector<SDL_Rect> vec = GetLayout(obj);
   int tmp = 0;
   Json::Value config = obj["config"];
+  Json::Value texture = obj["texture"];
   for (auto rect : vec) {
     ptr = new SEGS7(renderer, 16, 0x5555, OUTPUT_TYPE, SEGS7_TYPE);
     for (int j = 0; j < 8; ++j) {
+      SDL_Surface *sdl_surface;
+      SDL_Texture *sdl_texture;
       SDL_Rect seg_rect = (SDL_Rect){
           config["location"][j][0].asInt(), config["location"][j][1].asInt(),
           config["shape"][config["type"][j].asString()][0].asInt(),
           config["shape"][config["type"][j].asString()][1].asInt()};
-      rect_ptr = new SDL_Rect;
-      *rect_ptr = rect + seg_rect;
-      ptr->set_texture(segs_texture(j, 0), j << 1 | 0);
-      ptr->set_rect(rect_ptr, j << 1 | 0);
-      rect_ptr = new SDL_Rect;
-      *rect_ptr = rect + seg_rect;
-      ptr->set_texture(segs_texture(j, 1), j << 1 | 1);
-      ptr->set_rect(rect_ptr, j << 1 | 1);
+
+      assert(texture["mode"].asString() == "color");
+      for (auto color : texture["color"]) {
+        Json::Value rgb = color["rgb"];
+        rect_ptr = new SDL_Rect;
+        *rect_ptr = rect + seg_rect;
+        sdl_surface =
+            SDL_CreateRGBSurface(0, rect_ptr->w, rect_ptr->h, 32, 0, 0, 0, 0);
+        SDL_FillRect(sdl_surface, NULL,
+                     SDL_MapRGB(sdl_surface->format, rgb[0].asInt(),
+                                rgb[1].asInt(), rgb[2].asInt()));
+        sdl_texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
+        ptr->set_texture(sdl_texture, j << 1 | color["val"].asInt());
+        ptr->set_rect(rect_ptr, j << 1 | color["val"].asInt());
+      }
     }
 
     for (int p = GET_SEGA(tmp); p <= GET_DECP(tmp); p++) {
@@ -258,7 +254,7 @@ void NVBoardRenderer::initSegs7(Json::Value obj) {
 void NVBoardRenderer::initVGA(Json::Value obj) {
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
-  std::vector<SDL_Rect> vec = getLayout(obj);
+  std::vector<SDL_Rect> vec = GetLayout(obj);
   int tmp = 0;
   for (auto rect : vec) {
     // init vga
@@ -284,7 +280,7 @@ void NVBoardRenderer::initKeyboard(Json::Value obj) {
 }
 
 void NVBoardRenderer::init_components(Json::Value obj) {
-  for (auto i : obj["components"]) {
+  for (auto i : obj) {
     std::string i_class = i["class"].asString();
     if (i_class == "Button") {
       initButton(i);
@@ -337,7 +333,7 @@ void update_rt_components(SDL_Renderer *renderer) {
   }
 }
 
-std::vector<SDL_Rect> getLayout(Json::Value obj) {
+std::vector<SDL_Rect> NVBoardRenderer::GetLayout(Json::Value obj) {
   std::vector<SDL_Rect> ret;
   if (obj.isMember("layout")) {
     Json::Value layout = obj["layout"];
@@ -374,6 +370,39 @@ std::vector<SDL_Rect> getLayout(Json::Value obj) {
     } else {
       fprintf(stderr, "Layout mode %s is not implemented!\n",
               layout["mode"].asCString());
+    }
+  }
+  return ret;
+}
+
+std::vector<PairTexInt> NVBoardRenderer::GetTexture(Json::Value obj) {
+  std::vector<PairTexInt> ret;
+  if (obj.isMember("texture")) {
+    SDL_Surface *sdl_surface;
+    SDL_Texture *sdl_texture;
+    Json::Value texture = obj["texture"];
+    if (texture["mode"].asString() == "file") {
+      for (auto file : texture["file"]) {
+        sdl_surface =
+            IMG_Load((this->pic_path + file["name"].asString()).c_str());
+        sdl_texture = SDL_CreateTextureFromSurface(this->renderer, sdl_surface);
+        ret.push_back(std::make_pair(sdl_texture, file["val"].asInt()));
+      }
+    } else if (texture["mode"].asString() == "color") {
+      int width = obj["layout"]["shape"][0].asInt();
+      int height = obj["layout"]["shape"][0].asInt();
+      for (auto color : texture["color"]) {
+        sdl_surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+        Json::Value rgb = color["rgb"];
+        SDL_FillRect(sdl_surface, NULL,
+                     SDL_MapRGB(sdl_surface->format, rgb[0].asInt(),
+                                rgb[1].asInt(), rgb[2].asInt()));
+        sdl_texture = SDL_CreateTextureFromSurface(renderer, sdl_surface);
+        ret.push_back(std::make_pair(sdl_texture, color["val"].asInt()));
+      }
+    } else {
+      fprintf(stderr, "Texture mode %s is not implemented!\n",
+              texture["mode"].asCString());
     }
   }
   return ret;
