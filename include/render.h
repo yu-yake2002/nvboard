@@ -19,14 +19,6 @@ private:
   std::vector<SDL_Texture *> textures;
   void load_background(Json::Value obj);
   void init_components(Json::Value obj);
-  void initButton(Json::Value obj);
-  void initSwitch(Json::Value obj);
-  void initLED(Json::Value obj);
-  void initSegs7(Json::Value obj);
-  void initVGA(Json::Value obj);
-  void initKeyboard(Json::Value obj);
-  std::vector<SDL_Rect> GetLayout(Json::Value obj);
-  std::vector<PairTexInt> GetTexture(Json::Value obj);
   void init_gui();
   void mousedown_handler(const SDL_Event &ev);
   void mouseup_handler(const SDL_Event &ev);

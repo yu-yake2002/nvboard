@@ -68,6 +68,7 @@ void NVBoardViewer::RendererUpdate() {
 }
 
 NVBoardViewer::~NVBoardViewer() {
+  delete_components();
   SDL_DestroyWindow(this->window);
   SDL_DestroyRenderer(this->renderer);
 }

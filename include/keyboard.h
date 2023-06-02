@@ -33,6 +33,7 @@ class KEYBOARD : public Component{
     ~KEYBOARD();
     void push_key(uint8_t scancode, bool is_keydown);
     virtual void update_state();
+    static std::vector<Component *> Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac);
 };
 
 #endif

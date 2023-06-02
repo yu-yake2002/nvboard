@@ -102,8 +102,6 @@ NVBoardController::NVBoardController(NVBoardViewer *viewer) {
 }
 
 NVBoardController::~NVBoardController(){
-  viewer_->delete_components();
-  delete viewer_;
   for (auto p : pin_map_v_) {
     delete p;
   }

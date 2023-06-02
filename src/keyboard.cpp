@@ -67,3 +67,14 @@ void KEYBOARD::update_state(){
     left_clk --;
   }
 }
+
+std::vector<Component *> KEYBOARD::Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+  std::vector<Component *> ret;
+  extern KEYBOARD *kb;
+  kb = new KEYBOARD(renderer, 0, 0, INPUT_TYPE, KEYBOARD_TYPE);
+  for (int p = PS2_CLK; p <= PS2_DAT; p++) {
+    kb->add_input(p);
+  }
+  ret.push_back(kb);
+  return ret;
+}

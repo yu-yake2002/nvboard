@@ -21,14 +21,16 @@ int main() {
   nvboard_bind_all_pins(controller, model);
 
   reset(model, 10);
-
   while(1) {
     if (controller->Update() != 0) {
       single_cycle(model);
     } else {
-      delete controller;
       break;
     }
   }
+  
+  delete controller;
+  delete viewer;
+  delete model;
   return 0;
 }

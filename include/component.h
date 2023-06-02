@@ -2,9 +2,11 @@
 #define _VFPGA_COMPONENT_H
 
 #include <SDL2/SDL.h>
-#include <jsoncpp/json/json.h>
-#include <vector>
 #include <constrs.h>
+#include <factory.h>
+#include <jsoncpp/json/json.h>
+
+#include <vector>
 
 // interface type
 enum {
@@ -59,18 +61,31 @@ public:
   void remove();
 };
 
-class RGB_LED : public Component{
-public:
-  RGB_LED(SDL_Renderer *rend, int cnt, int init_val, int it, int ct);
-  virtual void update_gui();
-  virtual void update_state();
+class LED : public Component {
+ public:
+  static std::vector<Component *> Factory(SDL_Renderer *renderer,
+                                          Json::Value &obj, ComponentFactory &fac);
 };
 
-class SEGS7 : public Component{
-public:
+class Button : public Component {
+ public:
+  static std::vector<Component *> Factory(SDL_Renderer *renderer,
+                                          Json::Value &obj, ComponentFactory &fac);
+};
+
+class Switch : public Component {
+ public:
+  static std::vector<Component *> Factory(SDL_Renderer *renderer,
+                                          Json::Value &obj, ComponentFactory &fac);
+};
+
+class SEGS7 : public Component {
+ public:
   SEGS7(SDL_Renderer *rend, int cnt, int init_val, int it, int ct);
   virtual void update_gui();
   virtual void update_state();
+  static std::vector<Component *> Factory(SDL_Renderer *renderer,
+                                          Json::Value &obj, ComponentFactory &fac);
 };
 
 #endif

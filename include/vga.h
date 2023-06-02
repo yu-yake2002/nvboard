@@ -31,6 +31,7 @@ public:
 
   virtual void update_gui();
   virtual void update_state();
+  static std::vector<Component *> Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac);
 };
 
 #endif

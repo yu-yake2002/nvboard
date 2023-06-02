@@ -1,7 +1,9 @@
-#include <vga.h>
-#include <nvboard.h>
+#include <factory.h>
 #include <macro.h>
-#include <assert.h>
+#include <nvboard.h>
+#include <vga.h>
+
+#include <cassert>
 
 VGA_MODE vga_mod_accepted[NR_VGA_MODE] = {
   [VGA_MODE_640_480] = {
@@ -98,4 +100,30 @@ void VGA::update_state() {
 
 void vga_set_clk_cycle(int cycle) {
   vga_clk_cycle = cycle;
+}
+
+std::vector<Component *> Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+  std::vector<Component *> ret;
+  Component *ptr = nullptr;
+  SDL_Rect *rect_ptr = nullptr;
+  std::vector<SDL_Rect> vec = fac.GetLayout(obj);
+  int tmp = 0;
+  for (auto rect : vec) {
+    // init vga
+    ptr = new VGA(renderer, 1, 0, OUTPUT_TYPE, VGA_TYPE);
+    rect_ptr = new SDL_Rect;
+    *rect_ptr = rect;
+    ptr->set_rect(rect_ptr, 0);
+    for (int p = VGA_VSYNC; p <= VGA_B7; p++) {
+      ptr->add_output(p);
+    }
+    ret.push_back(ptr);
+  }
+  
+  if (obj.isMember("config") && obj["config"].isMember("clk")) {
+    vga_set_clk_cycle(obj["config"]["clk"].asInt());
+  } else {
+    vga_set_clk_cycle(1);
+  }
+  return ret;
 }
