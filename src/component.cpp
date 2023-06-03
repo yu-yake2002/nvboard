@@ -121,7 +121,12 @@ SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
 void NVBoardViewer::init_components(Json::Value obj) {
   ComponentFactory *factory = new ComponentFactory(pic_path, renderer);
   for (auto i : obj) {
-    factory->Manufacture(i);
+    auto vec = factory->Manufacture(i);
+    if (!i.isMember("rt") || (i["rt"].asBool() == true)) {
+      rt_components.insert(rt_components.end(), vec.begin(), vec.end());
+    } else {
+      components.insert(components.end(), vec.begin(), vec.end());
+    }
   }
   delete factory;
 }

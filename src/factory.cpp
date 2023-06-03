@@ -10,26 +10,16 @@ std::vector<Component *> ComponentFactory::Manufacture(Json::Value &obj) {
   std::string obj_class = obj["class"].asString();
   if (obj_class == "Button") {
     ret = VGA::Factory(sdl_renderer_, obj, *this);
-    // TODO:
-    // components.push_back(kb);
   } else if (obj_class == "Switch") {
     ret = VGA::Factory(sdl_renderer_, obj, *this);
-    // TODO:
-    // components.push_back(kb);
   } else if (obj_class == "LED") {
     ret = VGA::Factory(sdl_renderer_, obj, *this);
-    // TODO:
-    // components.push_back(kb);
   } else if (obj_class == "Segs7") {
     ret = VGA::Factory(sdl_renderer_, obj, *this);
-    // TODO:
-    // components.push_back(kb);
   } else if (obj_class == "Keyboard") {
     ret = KEYBOARD::Factory(sdl_renderer_, obj, *this);
-    // rt_components.push_back(kb);
   } else if (obj_class == "VGA") {
     ret = VGA::Factory(sdl_renderer_, obj, *this);
-    // rt_components.push_back(ptr);
   } else {
     fprintf(stderr, "Component %s is not implemented!\n",
             obj["class"].asCString());

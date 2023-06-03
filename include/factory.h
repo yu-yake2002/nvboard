@@ -1,11 +1,14 @@
 #ifndef _VFPGA_FACTORY_H
 #define _VFPGA_FACTORY_H
 
+#include <SDL2/SDL.h>
 #include <component.h>
 #include <jsoncpp/json/json.h>
-#include <SDL2/SDL.h>
 
 #include <vector>
+
+typedef std::pair<SDL_Texture *, int> PairTexInt;
+class Component;
 
 class ComponentFactory {
   std::string pic_path_;

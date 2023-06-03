@@ -17,6 +17,7 @@
   "components": [
     {
       "name": "btn",
+      "rt": false,
       "class": "Button",
       "texture": {
         "mode": "file",
@@ -47,6 +48,7 @@
     },
     {
       "name": "switch",
+      "rt": false,
       "class": "Switch",
       "texture": {
         "mode": "file",
@@ -71,6 +73,7 @@
     },
     {
       "name": "led",
+      "rt": false,
       "class": "LED",
       "texture": {
         "mode": "color",
@@ -95,6 +98,7 @@
     },
     {
       "name": "segs7",
+      "rt": false,
       "class": "Segs7",
       "texture": {
         "mode": "color",
@@ -147,6 +151,7 @@
     },
     {
       "name": "vga",
+      "rt": true,
       "class": "VGA",
       "pic": {
         "mode": "null"
@@ -163,6 +168,7 @@
     },
     {
       "name": "kbd",
+      "rt": true,
       "class": "Keyboard"
     }
   ]

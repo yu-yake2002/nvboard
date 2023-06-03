@@ -6,8 +6,6 @@
 #include <jsoncpp/json/json.h>
 #include <list>
 
-typedef std::pair<SDL_Texture *, int> PairTexInt;
-
 class NVBoardViewer {
 private:
   std::list<Component *> components;

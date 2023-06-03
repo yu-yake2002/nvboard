@@ -1,10 +1,11 @@
 #include <SDL2/SDL.h>
-#include <map>
-#include <string>
-#include <iostream>
-#include <vector>
 #include <component.h>
 #include <keyboard.h>
+
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;

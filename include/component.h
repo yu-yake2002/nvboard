@@ -28,6 +28,8 @@ union Pin {
   uint16_t m_out;
 };
 
+class ComponentFactory;
+
 class Component{
 private:
   SDL_Renderer *m_renderer;
