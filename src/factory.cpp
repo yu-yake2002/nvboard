@@ -9,13 +9,13 @@ std::vector<Component *> ComponentFactory::Manufacture(Json::Value &obj) {
   std::vector<Component *> ret;
   std::string obj_class = obj["class"].asString();
   if (obj_class == "Button") {
-    ret = VGA::Factory(sdl_renderer_, obj, *this);
+    ret = Button::Factory(sdl_renderer_, obj, *this);
   } else if (obj_class == "Switch") {
-    ret = VGA::Factory(sdl_renderer_, obj, *this);
+    ret = Switch::Factory(sdl_renderer_, obj, *this);
   } else if (obj_class == "LED") {
-    ret = VGA::Factory(sdl_renderer_, obj, *this);
+    ret = LED::Factory(sdl_renderer_, obj, *this);
   } else if (obj_class == "Segs7") {
-    ret = VGA::Factory(sdl_renderer_, obj, *this);
+    ret = SEGS7::Factory(sdl_renderer_, obj, *this);
   } else if (obj_class == "Keyboard") {
     ret = KEYBOARD::Factory(sdl_renderer_, obj, *this);
   } else if (obj_class == "VGA") {

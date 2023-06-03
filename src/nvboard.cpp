@@ -97,7 +97,7 @@ int NVBoardController::Update() {
 
 NVBoardController::NVBoardController(NVBoardViewer *viewer) {
   printf("NVBoard v0.2\n");
-  this->viewer_ = viewer;
+  viewer_ = viewer;
   boot_time = get_time_internal();
 }
 
