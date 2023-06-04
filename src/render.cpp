@@ -59,16 +59,19 @@ NVBoardViewer::NVBoardViewer(std::string board_name) {
   UpdateRTComponents();
 }
 
-SDL_Renderer *NVBoardViewer::GetRenderer() {
-  return this->renderer;
-}
-
 void NVBoardViewer::RendererUpdate() {
   SDL_RenderPresent(this->renderer);
 }
 
 NVBoardViewer::~NVBoardViewer() {
-  delete_components();
+  for (auto comp_ptr : nrt_components) {
+    delete comp_ptr;
+  }
+  nrt_components.clear();
+  for (auto comp_ptr : rt_components) {
+    delete comp_ptr;
+  }
+  rt_components.clear();
   SDL_DestroyWindow(this->window);
   SDL_DestroyRenderer(this->renderer);
 }

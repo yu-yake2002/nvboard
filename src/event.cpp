@@ -10,8 +10,8 @@
 void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
-  for (auto i : components) {
-    if (i->in_rect(x_pos, y_pos) && (i->get_interface_type() == INPUT_TYPE)) {
+  for (auto i : nrt_components) {
+    if ((i->get_interface_type() == INPUT_TYPE) && i->in_rect(x_pos, y_pos)) {
       switch (i->get_component_type()) {
         case BUTTON_TYPE: input_map[i->get_input()] = 1; break;
         case SWICTH_TYPE: input_map[i->get_input()] = i->get_state() ^ 1; break;
@@ -23,7 +23,7 @@ void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
 void NVBoardViewer::mouseup_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
-  for (auto i : components) {
+  for (auto i : nrt_components) {
     if (i->get_interface_type() == INPUT_TYPE && i->in_rect(x_pos, y_pos)) {
       switch (i->get_component_type()) {
         case BUTTON_TYPE: input_map[i->get_input()] = 0; break;

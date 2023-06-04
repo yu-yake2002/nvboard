@@ -33,7 +33,7 @@ VGA::VGA(SDL_Renderer *rend, int cnt, int init_val, int it, int ct):
 }
 
 VGA::~VGA() {
-  SDL_DestroyTexture(get_texture(0));
+  SDL_DestroyTexture(m_textures[0]);
   delete []pixels;
 }
 
@@ -43,9 +43,9 @@ void VGA::update_gui() {
   frames ++;
   printf("%d frames\n", frames);
 #endif
-  SDL_Texture *temp_texture = get_texture(0);
-  SDL_Renderer *temp_renderer = get_renderer();
-  SDL_Rect *temp_rect = get_rect(0);
+  SDL_Texture *temp_texture = m_textures[0];
+  SDL_Renderer *temp_renderer = m_renderer;
+  SDL_Rect *temp_rect = m_rects[0];
   SDL_UpdateTexture(temp_texture, NULL, pixels, vga_screen_width * sizeof(uint32_t));
   //SDL_RenderClear(temp_renderer);
   SDL_RenderCopy(temp_renderer, temp_texture, NULL, temp_rect);

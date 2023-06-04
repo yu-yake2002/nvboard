@@ -11,12 +11,12 @@ KEYBOARD* kb;
 static int keymap_first[256] = {};
 static int keymap_second[256] = {};
 
-void keymap_init(){
+static void keymap_init(){
   MAP(SCANCODE_LIST, FILL_KEYMAP_FIRST)
   MAP(SCANCODE_LIST, FILL_KEYMAP_DECOND)
 }
 
-int sdl2at(int scancode, int is_first){
+static int sdl2at(int scancode, int is_first){
   return is_first? keymap_first[scancode] : keymap_second[scancode];
 }
 

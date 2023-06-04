@@ -19,21 +19,21 @@ Component::Component(SDL_Renderer *rend, int cnt, int init_val, int it,
   m_state = init_val;
 }
 
+Component::~Component() {
+  for (auto rect_ptr : m_rects) {
+    delete rect_ptr;
+  }
+}
+
 bool Component::in_rect(int x, int y) const {
   SDL_Rect *temp = m_rects[0];
   return x >= temp->x && y >= temp->y && x < temp->x + temp->w &&
          y < temp->y + temp->h;
 }
 
-SDL_Renderer *Component::get_renderer() const { return m_renderer; }
-
 int Component::get_interface_type() const { return m_interface_type; }
 
 int Component::get_component_type() const { return m_component_type; }
-
-SDL_Rect *Component::get_rect(int idx) const { return m_rects[idx]; }
-
-SDL_Texture *Component::get_texture(int idx) const { return m_textures[idx]; }
 
 int Component::get_state() const { return m_state; }
 
@@ -46,8 +46,6 @@ void Component::set_rect(SDL_Rect *rect, int val) { m_rects[val] = rect; }
 void Component::set_texture(SDL_Texture *texture, int val) {
   m_textures[val] = texture;
 }
-
-void Component::set_state(int val) { m_state = val; }
 
 void Component::add_input(const uint16_t in) {
   Pin temp;
@@ -70,14 +68,8 @@ void Component::update_state() {
   int newval = (m_interface_type == INPUT_TYPE) ? input_map[pin.m_in]
                                                 : output_map[pin.m_out];
   if (newval != m_state) {
-    set_state(newval);
+    m_state = newval;
     update_gui();
-  }
-}
-
-void Component::remove() {
-  for (auto rect_ptr : m_rects) {
-    delete rect_ptr;
   }
 }
 
@@ -85,10 +77,10 @@ SEGS7::SEGS7(SDL_Renderer *rend, int cnt, int init_val, int it, int ct)
     : Component(rend, cnt, init_val, it, ct) {}
 
 void SEGS7::update_gui() {
-  int newval = get_state();
+  int newval = m_state;
   for (int i = 0; i < 16; ++i) {
     if ((newval >> i) & 1) {
-      SDL_RenderCopy(get_renderer(), get_texture(i), NULL, get_rect(i));
+      SDL_RenderCopy(m_renderer, m_textures[i], NULL, m_rects[i]);
     }
   }
 }
@@ -99,8 +91,8 @@ void SEGS7::update_state() {
     newval |=
         (output_map[get_output(i)]) ? (1 << (i << 1)) : (1 << (i << 1 | 1));
   }
-  if (newval != get_state()) {
-    set_state(newval);
+  if (newval != m_state) {
+    m_state = newval;
     update_gui();
   }
 }
@@ -125,34 +117,21 @@ void NVBoardViewer::init_components(Json::Value obj) {
     if (!i.isMember("rt") || (i["rt"].asBool() == true)) {
       rt_components.insert(rt_components.end(), vec.begin(), vec.end());
     } else {
-      components.insert(components.end(), vec.begin(), vec.end());
+      nrt_components.insert(nrt_components.end(), vec.begin(), vec.end());
     }
   }
   delete factory;
 }
 
-void NVBoardViewer::delete_components() {
-  for (auto comp_ptr : components) {
-    comp_ptr->remove();
-    delete comp_ptr;
-  }
-  components.clear();
-  for (auto comp_ptr : rt_components) {
-    comp_ptr->remove();
-    delete comp_ptr;
-  }
-  rt_components.clear();
-}
-
 // render buttons, switches, leds and 7-segs
 void NVBoardViewer::init_gui() {
-  for (auto ptr : components) {
+  for (auto ptr : nrt_components) {
     ptr->update_gui();
   }
 }
 
 void NVBoardViewer::UpdateNotRTComponents() {
-  for (auto ptr : components) {
+  for (auto ptr : nrt_components) {
     ptr->update_state();
   }
 }

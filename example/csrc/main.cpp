@@ -15,15 +15,15 @@ static inline void reset(Vtop *dut, int n) {
 }
 
 int main() {
-  Vtop *model = new Vtop();
+  Vtop *dut = new Vtop();
   NVBoardViewer *viewer = new NVBoardViewer();
   NVBoardController *controller = new NVBoardController(viewer);
-  nvboard_bind_all_pins(controller, model);
+  nvboard_bind_all_pins(controller, dut);
 
-  reset(model, 10);
+  reset(dut, 10);
   while(1) {
     if (controller->Update() != 0) {
-      single_cycle(model);
+      single_cycle(dut);
     } else {
       break;
     }
@@ -31,6 +31,6 @@ int main() {
   
   delete controller;
   delete viewer;
-  delete model;
+  delete dut;
   return 0;
 }
