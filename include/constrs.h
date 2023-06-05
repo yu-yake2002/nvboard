@@ -52,7 +52,11 @@ enum {
   NR_OUTPUT_PINS
 };
 
+namespace NVBoard {
+
 extern uint64_t input_map [];
 extern uint64_t output_map[];
+
+}  // namespace NVBoard
 
 #endif

@@ -9,7 +9,7 @@ NVBOARD_OBJS := $(addprefix $(NVBOARD_BUILD_DIR)/, $(addsuffix .o, $(basename $(
 
 # The archive of NVBoard
 NVBOARD_ARCHIVE = $(NVBOARD_BUILD_DIR)/nvboard.a
-CXXFLAGS += -MMD -O3
+CXXFLAGS += -MMD -O3 -g
 
 $(NVBOARD_BUILD_DIR)/%.o: $(NVBOARD_SRC)/%.cpp
 	@echo + CXX "->" NVBOARD_HOME/$(shell realpath $< --relative-to $(NVBOARD_HOME))

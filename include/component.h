@@ -8,14 +8,19 @@
 
 #include <vector>
 
+namespace NVBoard {
+
 // interface type
-enum {
-  INPUT_TYPE = 1, OUTPUT_TYPE = 2
-};
+enum { INPUT_TYPE = 1, OUTPUT_TYPE = 2 };
 
 // component type
 enum {
-  BUTTON_TYPE = 1, SWICTH_TYPE, NAIVE_LED_TYPE, SEGS7_TYPE, VGA_TYPE, KEYBOARD_TYPE
+  BUTTON_TYPE = 1,
+  SWICTH_TYPE,
+  NAIVE_LED_TYPE,
+  SEGS7_TYPE,
+  VGA_TYPE,
+  KEYBOARD_TYPE
 };
 
 union Pin {
@@ -25,51 +30,151 @@ union Pin {
 
 class ComponentFactory;
 
-class Component{
-protected:
-  SDL_Renderer *m_renderer;
-  std::vector<SDL_Rect *> m_rects;
-  std::vector<SDL_Texture *> m_textures;
-  int m_state;
-private:
-  int m_interface_type;
-  int m_component_type;
-  std::vector<Pin> pins;
+class Component {
+ protected:
+  SDL_Renderer *renderer_;
+  std::vector<SDL_Rect *> rects_;
+  std::vector<SDL_Texture *> textures_;
+  int state_;
 
-public:
+ private:
+  int interface_type_;
+  int component_type_;
+  std::vector<Pin> pins_;
+
+ public:
   Component(SDL_Renderer *rend, int cnt, int init_val, int it, int ct);
   ~Component();
-  bool in_rect(int x, int y) const;
-  int get_interface_type() const;
-  int get_component_type() const;
-  int get_state() const;
-  uint16_t get_input(int idx = 0) const;
-  uint16_t get_output(int idx = 0) const;
 
-  void set_rect(SDL_Rect *rect, int val);
-  void set_texture(SDL_Texture *texture, int val);
+  /**
+   * Check whether the point is in the Component's rect[0].
+   *
+   * \param x horizontal position of the point
+   * \param y vertical position of the point
+   */
+  bool in_rect(int x, int y) const;
+
+  /**
+   * Get the Component's interface_type.
+  */
+  int get_interface_type() const;
+
+  /**
+   * Get the Component's component_type.
+  */
+  int get_component_type() const;
+
+  /**
+   * Get the Component's state.
+  */
+  int get_state() const;
+
+  /**
+   * Read the Component's input pin.
+   *
+   * \param idx the index of pin in this component. You are reading
+   * pins_[idx].m_in
+   */
+  uint16_t get_input(int idx = 0) const;
+
+  /**
+   * Read the Component's output pin.
+   *
+   * \param idx the index of pin in this component. You are reading
+   * pins_[idx].m_out
+   */
+  uint16_t get_output(int idx = 0) const;
+  
+  /**
+   * Set the rect of component.
+   * 
+   * \param rect
+   * \param idx the index of rect in this component
+  */
+  void set_rect(SDL_Rect *rect, int idx);
+  
+  /**
+   * Set the texture of component.
+   * 
+   * \param texture
+   * \param idx the index of rect in this component
+  */
+  void set_texture(SDL_Texture *texture, int idx);
+
+  /**
+   * Add an input pin to the component.
+   * 
+   * \param in input pin's index in NVBoard
+  */
   void add_input(const uint16_t in);
+  
+  /**
+   * Add an output pin to the component.
+   * 
+   * \param out output pin's index in NVBoard
+  */
   void add_output(const uint16_t out);
+
+  /**
+   * Call SDL_RenderCopy to update texture. Note that it doesn't refresh the
+   * window.
+   */
   virtual void update_gui();
+
+  /**
+   * Update the component's state. If the state changes, call update_gui.
+   */
   virtual void update_state();
 };
 
 class LED : public Component {
  public:
+  /**
+   * The simple factory of LED.
+   * 
+   * \param renderer the SDL_Renderer you use
+   * \param obj the JSON object describing LEDs
+   * \param fac it should be the caller of this factory
+   * 
+   * \return it return a std::vector<Component *> that contains LED Components
+  */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj, ComponentFactory &fac);
+                                          Json::Value &obj,
+                                          ComponentFactory &fac);
 };
 
 class Button : public Component {
  public:
+  /**
+   * The simple factory of Button.
+   *
+   * \param renderer the SDL_Renderer you use
+   * \param obj the JSON object describing Buttons
+   * \param fac it should be the caller of this factory
+   *
+   * \return it return a std::vector<Component *> that contains Button
+   * Components
+   */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj, ComponentFactory &fac);
+                                          Json::Value &obj,
+                                          ComponentFactory &fac);
 };
 
 class Switch : public Component {
  public:
+  /**
+   * The simple factory of Switch.
+   *
+   * \param renderer the SDL_Renderer you use
+   * \param obj the JSON object describing Switchs
+   * \param fac it should be the caller of this factory
+   *
+   * \return it return a std::vector<Component *> that contains Switch
+   * Components
+   */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj, ComponentFactory &fac);
+                                          Json::Value &obj,
+                                          ComponentFactory &fac);
 };
 
 class SEGS7 : public Component {
@@ -77,8 +182,21 @@ class SEGS7 : public Component {
   SEGS7(SDL_Renderer *rend, int cnt, int init_val, int it, int ct);
   virtual void update_gui();
   virtual void update_state();
+  /**
+   * The simple factory of SEGS7.
+   *
+   * \param renderer the SDL_Renderer you use
+   * \param obj the JSON object describing SEGS7
+   * \param fac it should be the caller of this factory
+   *
+   * \return it return a std::vector<Component *> that contains SEGS7
+   * Components
+   */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj, ComponentFactory &fac);
+                                          Json::Value &obj,
+                                          ComponentFactory &fac);
 };
+
+}
 
 #endif

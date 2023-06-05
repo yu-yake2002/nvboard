@@ -2,73 +2,78 @@
 #include <nvboard.h>
 
 #include <iostream>
+#include <list>
 #include <map>
 #include <vector>
-#include <list>
+
+namespace NVBoard {
 
 extern uint64_t input_map[];
 extern uint64_t output_map[];
 
 Component::Component(SDL_Renderer *rend, int cnt, int init_val, int it,
                      int ct) {
-  m_renderer = rend;
-  m_interface_type = it;
-  m_component_type = ct;
-  m_rects.resize(cnt);
-  m_textures.resize(cnt);
-  m_state = init_val;
+  renderer_ = rend;
+  interface_type_ = it;
+  component_type_ = ct;
+  rects_.resize(cnt);
+  textures_.resize(cnt);
+  state_ = init_val;
 }
 
 Component::~Component() {
-  for (auto rect_ptr : m_rects) {
+  for (auto rect_ptr : rects_) {
     delete rect_ptr;
+  }
+  for (auto texture_ptr : textures_) {
+    SDL_DestroyTexture(texture_ptr);
   }
 }
 
 bool Component::in_rect(int x, int y) const {
-  SDL_Rect *temp = m_rects[0];
+  SDL_Rect *temp = rects_[0];
   return x >= temp->x && y >= temp->y && x < temp->x + temp->w &&
          y < temp->y + temp->h;
 }
 
-int Component::get_interface_type() const { return m_interface_type; }
+int Component::get_interface_type() const { return interface_type_; }
 
-int Component::get_component_type() const { return m_component_type; }
+int Component::get_component_type() const { return component_type_; }
 
-int Component::get_state() const { return m_state; }
+int Component::get_state() const { return state_; }
 
-uint16_t Component::get_input(int idx) const { return pins[idx].m_in; }
+uint16_t Component::get_input(int idx) const { return pins_[idx].m_in; }
 
-uint16_t Component::get_output(int idx) const { return pins[idx].m_out; }
+uint16_t Component::get_output(int idx) const { return pins_[idx].m_out; }
 
-void Component::set_rect(SDL_Rect *rect, int val) { m_rects[val] = rect; }
+void Component::set_rect(SDL_Rect *rect, int idx) { rects_[idx] = rect; }
 
-void Component::set_texture(SDL_Texture *texture, int val) {
-  m_textures[val] = texture;
+void Component::set_texture(SDL_Texture *texture, int idx) {
+  textures_[idx] = texture;
 }
 
 void Component::add_input(const uint16_t in) {
   Pin temp;
   temp.m_in = in;
-  pins.push_back(temp);
+  pins_.push_back(temp);
 }
 
 void Component::add_output(const uint16_t out) {
   Pin temp;
   temp.m_out = out;
-  pins.push_back(temp);
+  pins_.push_back(temp);
 }
 
 void Component::update_gui() {
-  SDL_RenderCopy(m_renderer, m_textures[m_state], NULL, m_rects[m_state]);
+  SDL_RenderCopy(renderer_, textures_[state_], NULL, rects_[state_]);
 }
 
 void Component::update_state() {
-  Pin pin = *(pins.begin());
-  int newval = (m_interface_type == INPUT_TYPE) ? input_map[pin.m_in]
-                                                : output_map[pin.m_out];
-  if (newval != m_state) {
-    m_state = newval;
+  Pin pin = *(pins_.begin());
+  int newval = (interface_type_ == INPUT_TYPE) ? input_map[pin.m_in]
+                                               : output_map[pin.m_out];
+  if (newval != state_) {
+    state_ = newval;
     update_gui();
   }
 }
@@ -77,10 +82,10 @@ SEGS7::SEGS7(SDL_Renderer *rend, int cnt, int init_val, int it, int ct)
     : Component(rend, cnt, init_val, it, ct) {}
 
 void SEGS7::update_gui() {
-  int newval = m_state;
+  int newval = state_;
   for (int i = 0; i < 16; ++i) {
     if ((newval >> i) & 1) {
-      SDL_RenderCopy(m_renderer, m_textures[i], NULL, m_rects[i]);
+      SDL_RenderCopy(renderer_, textures_[i], NULL, rects_[i]);
     }
   }
 }
@@ -91,15 +96,14 @@ void SEGS7::update_state() {
     newval |=
         (output_map[get_output(i)]) ? (1 << (i << 1)) : (1 << (i << 1 | 1));
   }
-  if (newval != m_state) {
-    m_state = newval;
+  if (newval != state_) {
+    state_ = newval;
     update_gui();
   }
 }
 
 extern SDL_Texture *tsegled_ver_off, *tsegled_ver_on, *tsegled_hor_off,
     *tsegled_hor_on, *tsegled_dot_off, *tsegled_dot_on;
-
 
 SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   SDL_Rect ret;
@@ -110,39 +114,9 @@ SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   return ret;
 }
 
-void NVBoardView::init_components(Json::Value obj) {
-  ComponentFactory *factory = new ComponentFactory(pic_path, renderer);
-  for (auto i : obj) {
-    auto vec = factory->Manufacture(i);
-    if (!i.isMember("rt") || (i["rt"].asBool() == true)) {
-      rt_components.insert(rt_components.end(), vec.begin(), vec.end());
-    } else {
-      nrt_components.insert(nrt_components.end(), vec.begin(), vec.end());
-    }
-  }
-  delete factory;
-}
-
-// render buttons, switches, leds and 7-segs
-void NVBoardView::init_gui() {
-  for (auto ptr : nrt_components) {
-    ptr->update_gui();
-  }
-}
-
-void NVBoardView::UpdateNotRTComponents() {
-  for (auto ptr : nrt_components) {
-    ptr->update_state();
-  }
-}
-
-void NVBoardView::UpdateRTComponents() {
-  for (auto ptr : rt_components) {
-    ptr->update_state();
-  }
-}
-
-std::vector<Component *> Button::Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+std::vector<Component *> Button::Factory(SDL_Renderer *renderer,
+                                         Json::Value &obj,
+                                         ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -166,7 +140,9 @@ std::vector<Component *> Button::Factory(SDL_Renderer *renderer, Json::Value &ob
   return ret;
 }
 
-std::vector<Component *> Switch::Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+std::vector<Component *> Switch::Factory(SDL_Renderer *renderer,
+                                         Json::Value &obj,
+                                         ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -175,7 +151,7 @@ std::vector<Component *> Switch::Factory(SDL_Renderer *renderer, Json::Value &ob
   int tmp = 0;
   for (auto rect : rect_vec) {
     ptr = new Component(renderer, 2, 0, INPUT_TYPE, SWICTH_TYPE);
-    
+
     for (auto tex : tex_vec) {
       rect_ptr = new SDL_Rect;
       *rect_ptr = rect;
@@ -190,7 +166,8 @@ std::vector<Component *> Switch::Factory(SDL_Renderer *renderer, Json::Value &ob
   return ret;
 }
 
-std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj,
+                                      ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -200,7 +177,7 @@ std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj, 
   // init naive leds
   for (auto rect : rect_vec) {
     ptr = new Component(renderer, 2, 0, OUTPUT_TYPE, NAIVE_LED_TYPE);
-    
+
     for (auto tex : tex_vec) {
       rect_ptr = new SDL_Rect;
       *rect_ptr = rect;
@@ -218,7 +195,9 @@ std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj, 
 #define GET_SEGA(i) (SEG0A + 8 * i)
 #define GET_DECP(i) (SEG0A + 8 * i + 7)
 
-std::vector<Component *> SEGS7::Factory(SDL_Renderer *renderer, Json::Value &obj, ComponentFactory &fac) {
+std::vector<Component *> SEGS7::Factory(SDL_Renderer *renderer,
+                                        Json::Value &obj,
+                                        ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -260,3 +239,5 @@ std::vector<Component *> SEGS7::Factory(SDL_Renderer *renderer, Json::Value &obj
   }
   return ret;
 }
+
+}  // namespace NVBoard

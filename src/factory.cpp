@@ -1,5 +1,8 @@
+#include <SDL2/SDL.h>
 #include <factory.h>
 #include <keyboard.h>
+
+namespace NVBoard {
 
 ComponentFactory::ComponentFactory(std::string pic_path,
                                    SDL_Renderer *sdl_renderer)
@@ -100,3 +103,5 @@ std::vector<PairTexInt> ComponentFactory::GetTexture(Json::Value &obj) {
   }
   return ret;
 }
+
+}  // namespace NVBoard

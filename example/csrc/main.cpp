@@ -1,7 +1,7 @@
 #include <nvboard.h>
 #include <Vtop.h>
 
-void nvboard_bind_all_pins(NVBoardController *board, Vtop* top);
+void nvboard_bind_all_pins(NVBoard::NVBoardController *board, Vtop* top);
 
 static inline void single_cycle(TOP_NAME *dut) {
   dut->clk = 0; dut->eval();
@@ -16,12 +16,12 @@ static inline void reset(Vtop *dut, int n) {
 
 int main() {
   Vtop *model = new Vtop();
-  NVBoardController *controller = new NVBoardController();
+  NVBoard::NVBoardController *controller = new NVBoard::NVBoardController();
   nvboard_bind_all_pins(controller, model);
 
   reset(model, 10);
   while(1) {
-    if (controller->Update() != 0) {
+    if (controller->NVBoardUpdate() != 0) {
       single_cycle(model);
     } else {
       break;
