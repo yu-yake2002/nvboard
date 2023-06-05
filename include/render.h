@@ -6,7 +6,7 @@
 #include <jsoncpp/json/json.h>
 #include <list>
 
-class NVBoardViewer {
+class NVBoardView {
 private:
   std::list<Component *> nrt_components;
   std::list<Component *> rt_components;  // real-time components
@@ -24,8 +24,8 @@ public:
   void UpdateNotRTComponents();
   void UpdateRTComponents();
   int read_event();
-  NVBoardViewer(std::string board_name = "N4");
-  ~NVBoardViewer();
+  NVBoardView(std::string board_name = "N4");
+  ~NVBoardView();
 };
 
 #endif

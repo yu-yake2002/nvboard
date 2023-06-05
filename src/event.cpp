@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
+void NVBoardView::mousedown_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
   for (auto i : nrt_components) {
@@ -20,7 +20,7 @@ void NVBoardViewer::mousedown_handler(const SDL_Event &ev) {
   }
 }
 
-void NVBoardViewer::mouseup_handler(const SDL_Event &ev) {
+void NVBoardView::mouseup_handler(const SDL_Event &ev) {
   int x_pos = ev.button.x;
   int y_pos = ev.button.y;
   for (auto i : nrt_components) {
@@ -32,14 +32,14 @@ void NVBoardViewer::mouseup_handler(const SDL_Event &ev) {
   }
 }
 
-void NVBoardViewer::key_handler(uint8_t scancode, int is_keydown) {
+void NVBoardView::key_handler(uint8_t scancode, int is_keydown) {
   extern KEYBOARD* kb;
   kb->push_key(scancode, is_keydown);
 }
 
 // Return -1 when esc is pressed.
 // Else return whether buttons / switches are pressed.
-int NVBoardViewer::read_event() {
+int NVBoardView::read_event() {
   SDL_Event ev;
   SDL_PollEvent(&ev);
   switch (ev.type) {

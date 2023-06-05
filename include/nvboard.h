@@ -28,7 +28,7 @@ typedef struct PinMap {
 
 class NVBoardController {
 private:
-  NVBoardViewer *viewer_;
+  NVBoardView *viewer_;
   std::list<PinMap *> pin_map_v_;
   std::list<PinMap *> rt_pin_map_v_;
   void UpdateInputPin(PinMap *p);
@@ -40,7 +40,7 @@ public:
    *
    * \param board
    */
-  NVBoardController(NVBoardViewer *viewer);
+  NVBoardController(NVBoardView *viewer);
 
   /**
    * Quit NVBoard.
@@ -56,7 +56,7 @@ public:
    * \param len
    * \param ...
    */
-  void nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...);
+  void NVboardBindPin(void *signal, bool is_rt, bool is_output, int len, ...);
 
   /**
    * Update NVBoard.

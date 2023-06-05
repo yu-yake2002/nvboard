@@ -95,7 +95,7 @@ int NVBoardController::Update() {
   return ret;
 }
 
-NVBoardController::NVBoardController(NVBoardViewer *viewer) {
+NVBoardController::NVBoardController(NVBoardView *viewer) {
   printf("NVBoard v0.2\n");
   viewer_ = viewer;
   boot_time = get_time_internal();
@@ -112,7 +112,7 @@ NVBoardController::~NVBoardController(){
   SDL_Quit();
 }
 
-void NVBoardController::nvboard_bind_pin(void *signal, bool is_rt, bool is_output, int len, ...) {
+void NVBoardController::NVboardBindPin(void *signal, bool is_rt, bool is_output, int len, ...) {
   PinMap *p = new PinMap;
   p->is_output = is_output;
   p->len = len;

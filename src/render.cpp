@@ -11,7 +11,7 @@
 #include <string>
 #include <fstream>
 
-void NVBoardViewer::load_background(Json::Value obj) {
+void NVBoardView::load_background(Json::Value obj) {
   for (auto bg : obj) {
     SDL_Surface *surface =
         IMG_Load((this->pic_path + bg["pic"].asString()).c_str());
@@ -22,7 +22,7 @@ void NVBoardViewer::load_background(Json::Value obj) {
   }
 }
 
-NVBoardViewer::NVBoardViewer(std::string board_name) {
+NVBoardView::NVBoardView(std::string board_name) {
   SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
   IMG_Init(IMG_INIT_PNG);
 
@@ -59,11 +59,11 @@ NVBoardViewer::NVBoardViewer(std::string board_name) {
   UpdateRTComponents();
 }
 
-void NVBoardViewer::RendererUpdate() {
+void NVBoardView::RendererUpdate() {
   SDL_RenderPresent(this->renderer);
 }
 
-NVBoardViewer::~NVBoardViewer() {
+NVBoardView::~NVBoardView() {
   for (auto comp_ptr : nrt_components) {
     delete comp_ptr;
   }

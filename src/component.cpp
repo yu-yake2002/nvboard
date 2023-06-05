@@ -110,7 +110,7 @@ SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
   return ret;
 }
 
-void NVBoardViewer::init_components(Json::Value obj) {
+void NVBoardView::init_components(Json::Value obj) {
   ComponentFactory *factory = new ComponentFactory(pic_path, renderer);
   for (auto i : obj) {
     auto vec = factory->Manufacture(i);
@@ -124,19 +124,19 @@ void NVBoardViewer::init_components(Json::Value obj) {
 }
 
 // render buttons, switches, leds and 7-segs
-void NVBoardViewer::init_gui() {
+void NVBoardView::init_gui() {
   for (auto ptr : nrt_components) {
     ptr->update_gui();
   }
 }
 
-void NVBoardViewer::UpdateNotRTComponents() {
+void NVBoardView::UpdateNotRTComponents() {
   for (auto ptr : nrt_components) {
     ptr->update_state();
   }
 }
 
-void NVBoardViewer::UpdateRTComponents() {
+void NVBoardView::UpdateRTComponents() {
   for (auto ptr : rt_components) {
     ptr->update_state();
   }
