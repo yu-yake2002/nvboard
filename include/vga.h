@@ -46,8 +46,8 @@ class VGA : public Component {
    * \return it return a std::vector<Component *> that contains VGA Components
    */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 }  // namespace NVBoard

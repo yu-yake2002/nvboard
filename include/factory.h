@@ -25,10 +25,10 @@ class ComponentFactory {
    * \param obj a JSON object describing the Components
    * \return it return a std::vector<Component *> that contains right Components
    */
-  std::vector<Component *> Manufacture(Json::Value &obj);
+  std::vector<Component *> Manufacture(const Json::Value &obj) const;
 
-  std::vector<SDL_Rect> GetLayout(Json::Value &obj);
-  std::vector<PairTexInt> GetTexture(Json::Value &obj);
+  std::vector<SDL_Rect> GetLayout(const Json::Value &obj) const;
+  std::vector<PairTexInt> GetTexture(const Json::Value &obj) const;
 };
 
 }  // namespace NVBoard

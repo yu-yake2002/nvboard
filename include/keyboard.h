@@ -55,8 +55,8 @@ class KEYBOARD : public Component {
    * Components
    */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 }  // namespace NVBoard

@@ -99,8 +99,9 @@ void VGA::update_state() {
 
 void vga_set_clk_cycle(int cycle) { vga_clk_cycle = cycle; }
 
-std::vector<Component *> VGA::Factory(SDL_Renderer *renderer, Json::Value &obj,
-                                      ComponentFactory &fac) {
+std::vector<Component *> VGA::Factory(SDL_Renderer *renderer,
+                                      const Json::Value &obj,
+                                      const ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;

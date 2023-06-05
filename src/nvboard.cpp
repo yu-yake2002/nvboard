@@ -161,6 +161,33 @@ void NVBoardController::NVBoardBindPin(void *signal, bool is_rt, bool is_output,
   }
 }
 
+void NVBoardController::NVBoardBindPin(void *signal, bool is_rt, bool is_output, int len, const std::list<int> &pins_list) {
+  PinMap *p = nullptr;
+  assert(len < 64);
+
+  if (len == 1) {
+    p = new PinMap(signal, is_output, len, pins_list.front());
+  } else {
+    uint16_t *pins = new uint16_t[len];
+    int i = 0;
+    for (auto pin : pins_list) {
+      if (is_output)
+        pins[len - 1 - i] = pin;
+      else
+        pins[i] = pin;
+      i++;
+    }
+    p = new PinMap(signal, is_output, len, pins);
+    delete[] pins;
+  }
+
+  if (is_rt) {
+    rt_pin_map_v_.push_back(p);
+  } else {
+    pin_map_v_.push_back(p);
+  }
+}
+
 PinMap::PinMap(void *signal, bool is_output, int len, uint16_t pin)
     : is_output_(is_output), len_(len), signal_(signal), pin_(pin) {
   assert(len == 1);

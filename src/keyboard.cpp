@@ -77,8 +77,8 @@ void KEYBOARD::update_state() {
 }
 
 std::vector<Component *> KEYBOARD::Factory(SDL_Renderer *renderer,
-                                           Json::Value &obj,
-                                           ComponentFactory &fac) {
+                                           const Json::Value &obj,
+                                           const ComponentFactory &fac) {
   std::vector<Component *> ret;
   extern KEYBOARD *kb;
   kb = new KEYBOARD(renderer, 0, 0, INPUT_TYPE, KEYBOARD_TYPE);

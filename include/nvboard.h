@@ -4,6 +4,7 @@
 #include <component.h>
 #include <constrs.h>
 #include <keyboard.h>
+#include <legacy.h>
 #include <vga.h>
 #include <view.h>
 
@@ -54,13 +55,26 @@ class NVBoardController {
   /**
    * Bind pin of NVBoard.
    *
-   * \param signal
-   * \param is_rt
-   * \param is_output
-   * \param len
-   * \param ...
+   * \param signal the signal in verilator model
+   * \param is_rt whether this signal is a real-time signal
+   * \param is_output whether this signal is an output signal
+   * \param len the length of signal. If len is more than 1, signal will be a 
+   * vector signal
+   * \param ... pins in NVBoard, from MSB to LSB
    */
   void NVBoardBindPin(void *signal, bool is_rt, bool is_output, int len, ...);
+
+  /**
+   * Bind pin of NVBoard.
+   *
+   * \param signal the signal in verilator model
+   * \param is_rt whether this signal is a real-time signal
+   * \param is_output whether this signal is an output signal
+   * \param len the length of signal. If len is more than 1, signal will be a 
+   * vector signal
+   * \param pins pins in NVBoard, from MSB to LSB
+   */
+  void NVBoardBindPin(void *signal, bool is_rt, bool is_output, int len, const std::list<int> &pins);
 
   /**
    * Update NVBoard.

@@ -115,8 +115,8 @@ SDL_Rect operator+(const SDL_Rect &A, const SDL_Rect &B) {
 }
 
 std::vector<Component *> Button::Factory(SDL_Renderer *renderer,
-                                         Json::Value &obj,
-                                         ComponentFactory &fac) {
+                                         const Json::Value &obj,
+                                         const ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -141,8 +141,8 @@ std::vector<Component *> Button::Factory(SDL_Renderer *renderer,
 }
 
 std::vector<Component *> Switch::Factory(SDL_Renderer *renderer,
-                                         Json::Value &obj,
-                                         ComponentFactory &fac) {
+                                         const Json::Value &obj,
+                                         const ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -166,8 +166,8 @@ std::vector<Component *> Switch::Factory(SDL_Renderer *renderer,
   return ret;
 }
 
-std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj,
-                                      ComponentFactory &fac) {
+std::vector<Component *> LED::Factory(SDL_Renderer *renderer, const Json::Value &obj,
+                                      const ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;
@@ -196,8 +196,8 @@ std::vector<Component *> LED::Factory(SDL_Renderer *renderer, Json::Value &obj,
 #define GET_DECP(i) (SEG0A + 8 * i + 7)
 
 std::vector<Component *> SEGS7::Factory(SDL_Renderer *renderer,
-                                        Json::Value &obj,
-                                        ComponentFactory &fac) {
+                                        const Json::Value &obj,
+                                        const ComponentFactory &fac) {
   std::vector<Component *> ret;
   Component *ptr = nullptr;
   SDL_Rect *rect_ptr = nullptr;

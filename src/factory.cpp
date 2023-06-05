@@ -8,7 +8,7 @@ ComponentFactory::ComponentFactory(std::string pic_path,
                                    SDL_Renderer *sdl_renderer)
     : pic_path_(pic_path), sdl_renderer_(sdl_renderer) {}
 
-std::vector<Component *> ComponentFactory::Manufacture(Json::Value &obj) {
+std::vector<Component *> ComponentFactory::Manufacture(const Json::Value &obj) const {
   std::vector<Component *> ret;
   std::string obj_class = obj["class"].asString();
   if (obj_class == "Button") {
@@ -30,7 +30,7 @@ std::vector<Component *> ComponentFactory::Manufacture(Json::Value &obj) {
   return ret;
 }
 
-std::vector<SDL_Rect> ComponentFactory::GetLayout(Json::Value &obj) {
+std::vector<SDL_Rect> ComponentFactory::GetLayout(const Json::Value &obj) const {
   std::vector<SDL_Rect> ret;
   if (obj.isMember("layout")) {
     Json::Value layout = obj["layout"];
@@ -72,7 +72,7 @@ std::vector<SDL_Rect> ComponentFactory::GetLayout(Json::Value &obj) {
   return ret;
 }
 
-std::vector<PairTexInt> ComponentFactory::GetTexture(Json::Value &obj) {
+std::vector<PairTexInt> ComponentFactory::GetTexture(const Json::Value &obj) const {
   std::vector<PairTexInt> ret;
   if (obj.isMember("texture")) {
     SDL_Surface *sdl_surface;

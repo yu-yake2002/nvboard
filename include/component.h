@@ -139,8 +139,8 @@ class LED : public Component {
    * \return it return a std::vector<Component *> that contains LED Components
   */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 class Button : public Component {
@@ -156,8 +156,8 @@ class Button : public Component {
    * Components
    */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 class Switch : public Component {
@@ -173,8 +173,8 @@ class Switch : public Component {
    * Components
    */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 class SEGS7 : public Component {
@@ -193,8 +193,8 @@ class SEGS7 : public Component {
    * Components
    */
   static std::vector<Component *> Factory(SDL_Renderer *renderer,
-                                          Json::Value &obj,
-                                          ComponentFactory &fac);
+                                          const Json::Value &obj,
+                                          const ComponentFactory &fac);
 };
 
 }
