@@ -56,7 +56,7 @@ public:
    * \param len
    * \param ...
    */
-  void NVboardBindPin(void *signal, bool is_rt, bool is_output, int len, ...);
+  void NVBoardBindPin(void *signal, bool is_rt, bool is_output, int len, ...);
 
   /**
    * Update NVBoard.

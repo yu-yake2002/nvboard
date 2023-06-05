@@ -184,7 +184,7 @@ class AutoBindWriter():
     ratestr = self.board.getPinRateStr(pin)
     dirstr = self.board.getPinDirStr(pin)
     
-    self.iw.write(f"board->nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, 1, {pin});\n")
+    self.iw.write(f"board->NVBoardBindPin( &top->{signal}, {ratestr}, {dirstr}, 1, {pin});\n")
   
   def bindVec(self, signal, pins):
     for pin in pins:
@@ -194,7 +194,7 @@ class AutoBindWriter():
     ratestr = self.board.getPinRateStr(pins[0])
     dirstr = self.board.getPinDirStr(pins[0])
     
-    self.iw.write(f"board->nvboard_bind_pin( &top->{signal}, {ratestr}, {dirstr}, {len(pins)}")
+    self.iw.write(f"board->NVBoardBindPin( &top->{signal}, {ratestr}, {dirstr}, {len(pins)}")
     for pin in pins:
       self.iw.write(f", {pin}")
     self.iw.write(");\n")

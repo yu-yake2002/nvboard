@@ -112,7 +112,7 @@ NVBoardController::~NVBoardController(){
   SDL_Quit();
 }
 
-void NVBoardController::NVboardBindPin(void *signal, bool is_rt, bool is_output, int len, ...) {
+void NVBoardController::NVBoardBindPin(void *signal, bool is_rt, bool is_output, int len, ...) {
   PinMap *p = new PinMap;
   p->is_output = is_output;
   p->len = len;
