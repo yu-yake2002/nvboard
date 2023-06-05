@@ -16,8 +16,7 @@ static inline void reset(Vtop *dut, int n) {
 
 int main() {
   Vtop *model = new Vtop();
-  NVBoardView *view = new NVBoardView();
-  NVBoardController *controller = new NVBoardController(view);
+  NVBoardController *controller = new NVBoardController();
   nvboard_bind_all_pins(controller, model);
 
   reset(model, 10);
@@ -30,7 +29,6 @@ int main() {
   }
   
   delete controller;
-  delete view;
   delete model;
   return 0;
 }

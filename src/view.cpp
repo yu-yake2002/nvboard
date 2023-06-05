@@ -1,9 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <component.h>
-#include <configs.h>
 #include <jsoncpp/json/json.h>
-#include <render.h>
+#include <view.h>
 #include <vga.h>
 
 #include <cassert>
@@ -40,18 +39,18 @@ NVBoardView::NVBoardView(std::string board_name) {
   window = SDL_CreateWindow("nvboard", SDL_WINDOWPOS_CENTERED,
                                   SDL_WINDOWPOS_CENTERED, board_width,
                                   board_height, SDL_WINDOW_SHOWN);
-  renderer = SDL_CreateRenderer(window, -1, 
-  #ifdef VSYNC
-      SDL_RENDERER_PRESENTVSYNC |
-  #endif
-  #ifdef HARDWARE_ACC
-      SDL_RENDERER_ACCELERATED |
-  #else
-      SDL_RENDERER_SOFTWARE |
-  #endif
-      0
-  );
-  
+
+  Uint32 renderer_flags = 0;
+  if (obj.isMember("vsync") && (obj["vsync"].asBool() == true)) {
+    renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
+  }
+  if (obj.isMember("hardware_acc") && obj["hardware_acc"].asBool() == true) {
+    renderer_flags |= SDL_RENDERER_ACCELERATED;
+  } else {
+    renderer_flags |= SDL_RENDERER_SOFTWARE;
+  }
+  renderer = SDL_CreateRenderer(window, -1, renderer_flags);
+  printf("%u\n", renderer_flags);
   load_background(obj["background"]);
   init_components(obj["components"]);
   init_gui();

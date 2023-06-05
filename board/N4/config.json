@@ -2,6 +2,8 @@
   "name": "N4",
   "version": "1.0.0",
   "shape": [1280, 480],
+  "vsync": true,
+  "hardware_acc": true,
   "background": [
     {
       "pic": "vbg_2.png",

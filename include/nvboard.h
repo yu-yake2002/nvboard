@@ -2,10 +2,9 @@
 #define __NVBOARD_H__
 
 #include <component.h>
-#include <configs.h>
 #include <constrs.h>
 #include <keyboard.h>
-#include <render.h>
+#include <view.h>
 #include <vga.h>
 
 #include <string>
@@ -40,7 +39,7 @@ public:
    *
    * \param board
    */
-  NVBoardController(NVBoardView *viewer);
+  NVBoardController(std::string board = "N4");
 
   /**
    * Quit NVBoard.
